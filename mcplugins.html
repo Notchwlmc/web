@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="force-rendering" content="webkit">
+    <title>MCPlugins</title>
+    <meta name="copyright" content="2025-2026 Created by Notchwlmc">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1e1e24;
+            --bg-sidebar: #25252d;
+            --bg-card: #2b2b36;
+            --primary: #7c4dff;
+            --text-main: #ffffff;
+            --text-sub: #a0a0a0;
+            --border: #3f3f4e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 240px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            flex-shrink: 0;
+        }
+
+        .logo-area {
+            padding: 0 20px 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 10px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(124, 77, 255, 0.1);
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+
+        .menu-item i { margin-right: 15px; font-size: 22px; }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .search-header {
+            background-color: var(--bg-card);
+            padding: 30px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .search-box {
+            display: flex;
+            max-width: 800px;
+            margin: 0 auto;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-dark);
+            color: white;
+            outline: none;
+        }
+
+        input[type="text"]:focus { border-color: var(--primary); }
+
+        button.search-btn {
+            padding: 0 25px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button.search-btn:hover { opacity: 0.9; }
+
+        #content-area {
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .plugin-card {
+            background-color: var(--bg-card);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            border: 1px solid transparent;
+            transition: transform 0.2s;
+        }
+
+        .plugin-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            flex-shrink: 0;
+            background-color: #333;
+            border-radius: 8px;
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            overflow: hidden;
+        }
+        .card-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-info h3 { margin-bottom: 5px; font-size: 18px; }
+        .card-info p { color: var(--text-sub); font-size: 14px; margin-bottom: 8px; }
+        .tags span {
+            background-color: rgba(255,255,255,0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .loading { text-align: center; padding: 50px; color: var(--text-sub); }
+
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="logo-area">MC Plugins </div>
+    <a class="menu-item active" onclick="loadPage('home')">
+        <i class="material-icons">home</i> 首页概览
+    </a>
+    <a class="menu-item" onclick="loadPage('plugins')">
+        <i class="material-icons">layers</i> 插件中心
+    </a>
+    <a class="menu-item" onclick="loadPage('mods')">
+        <i class="material-icons">extension</i> 模组中心
+    </a>
+</div>
+
+
+<div class="main-container">
+    <div class="search-header">
+        <h2 style="margin-bottom: 15px;">插件资源搜索</h2>
+        <div class="search-box">
+            <input type="text" placeholder="输入插件名、作者或关键词...">
+            <button class="search-btn">搜索插件</button>
+        </div>
+    </div>
+
+    <div id="content-area">
+    </div>
+</div>
+
+<script>
+    const pages = {
+        'home': `
+                <h2>欢迎来到资源中心</h2>
+                <p style="color:#aaa; margin-top:10px;">这里是最新更新的服务器资源统计。</p>
+                <div style="display:flex; gap:20px; margin-top:20px;">
+                    <div style="background:#2b2b36; padding:20px; flex:1; border-radius:8px;">
+                        <h3>2</h3>
+                        <p>收录插件总数</p>
+                    </div>
+                    <div style="background:#2b2b36; padding:20px; flex:1; border-radius:8px;">
+                        <h3>0</h3>
+                        <p>累计下载量</p>
+                    </div>
+                </div>
+            `,
+        'plugins': `
+<a href="plugins-detail.html" class="card-link-wrapper" style="text-decoration: none; color: inherit; display: block;">
+                <div class="plugin-card">
+                    <div class="card-icon"><img src="./PublicTP.png" alt=""></div>
+                    <div class="card-info">
+                        <h3>PublicTP</h3>
+                        <p>A plugin can record locations and share to everyone.</p>
+                        <div class="tags"><span>Bukkit</span><span>Spigot</span><span>1.21.x</span></div>
+                    </div>
+                </div>
+                </a>
+                <div class="plugin-card">
+                    <div class="card-icon"><img src="./Ramchecker.png" alit=""></div>
+                    <div class="card-info">
+                        <h3>Ramchecker</h3>
+                        <p>Can monitor server memory usage, and restart the server when it exceeds the threshold</p>
+                        <div class="tags"><span>Paper</span><span>1.21.x</span></div>
+                    </div>
+                </div>
+            `,
+        'mods': `<h2>模组加载中...</h2><p></p>`,
+    };
+
+    // 核心功能：局部刷新函数
+    function loadPage(pageName) {
+        // 1. 获取容器
+        const contentDiv = document.getElementById('content-area');
+
+        // 2. 显示加载状态 (可选)
+        contentDiv.innerHTML = '<div class="loading"><i class="material-icons" style="animation: spin 1s linear infinite;">autorenew</i> 正在加载数据...</div>';
+
+        // 3. 模拟网络延迟后渲染内容 (实际开发中这里应该是 fetch/ajax 请求)
+        setTimeout(() => {
+            if(pages[pageName]) {
+                contentDiv.innerHTML = pages[pageName];
+            } else {
+                contentDiv.innerHTML = '<h2>404 页面未找到</h2>';
+            }
+        }, 300); // 300毫秒延迟模拟真实感
+
+        // 4. 更新菜单激活状态
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        // 找到被点击的元素并添加 active (这里简单处理，实际可以用 event.target)
+        event.currentTarget.classList.add('active');
+
+        // 5. (可选) 修改浏览器 URL 但不刷新页面
+        history.pushState({page: pageName}, null, `?tab=${pageName}`);
+    }
+
+    // 初始化加载首页
+    loadPage('home');
+
+</script>
+</body>
+</html>

@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>欢迎回来 - 赣一神人会</title>
+    <style>
+        @font-face {
+            font-family: 'Minecraft AE';
+            src: url('Minecraft AE.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Minecraft AE', -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            background-color: #000; color: #fff;
+            overflow-x: hidden;
+            min-height: 200vh;
+        }
+
+        #canvas-container {
+            position: fixed; inset: 0; z-index: 1;
+            transition: filter 0.3s ease;
+        }
+
+        .vignette {
+            position: fixed; inset: 0;
+            background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
+            z-index: 2; pointer-events: none;
+        }
+
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 80px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 40px; z-index: 1000;
+            background: rgba(15, 15, 20, 0.35);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: none;
+            transition: background 0.4s ease;
+        }
+        .navbar.scrolled { background: rgba(10, 10, 15, 0.85); }
+
+        .navbar::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 20%, rgba(37, 230, 197, 0.4) 50%, rgba(255, 255, 255, 0.15) 80%, transparent 100%);
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 16px; position: relative; min-width: 0; }
+
+        .menu-btn {
+            position: relative; display: flex; justify-content: center; align-items: center;
+            width: 42px; height: 42px; background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50%; cursor: pointer;
+            backdrop-filter: blur(5px); transition: all 0.3s ease;
+        }
+        .menu-btn:hover { background: rgba(0, 0, 0, 0.5); border-color: rgba(255, 255, 255, 0.25); }
+
+        .menu-btn span {
+            position: absolute; left: 50%; top: 50%; width: 18px; height: 2px;
+            background-color: #25e6c5; border-radius: 2px; margin-left: -9px; margin-top: -1px;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .menu-btn span:nth-child(1) { transform: translateY(-6px); }
+        .menu-btn span:nth-child(2) { transform: translateY(0); }
+        .menu-btn span:nth-child(3) { transform: translateY(6px); }
+        .menu-btn.active span:nth-child(1) { transform: rotate(45deg) translateY(0); }
+        .menu-btn.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+        .menu-btn.active span:nth-child(3) { transform: rotate(-45deg) translateY(0); }
+
+        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; }
+        .logo-text-group { display: flex; flex-direction: column; justify-content: center; }
+        .logo-text-cn { font-size: 1.3rem; font-weight: 700; line-height: 1.2; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .logo-text-en { font-size: 0.65rem; color: #ddd; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 2px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        .logo-text-group{
+            display: flex;
+            align-items: center;
+            gap:8px;
+            min-width: 0;
+            overflow: hidden;
+        }
+        .logo-text-cn {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            line-height: 1.1;
+            white-space: nowrap;
+        }
+        .logo-text-en{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            line-height: 1.1;
+            white-space: nowrap;
+        }
+            .logo-dot { width: 10px; height: 10px; background: #25e6c5; border-radius: 50%; box-shadow: 0 0 10px #25e6c5; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(37, 230, 197, 0.7); } 50% { box-shadow: 0 0 0 10px rgba(37, 230, 197, 0); } }
+
+        .nav-menu {
+            position: absolute;
+            top: 50px;
+            left: 0;
+            width: 180px;
+            background: rgba(15, 15, 20, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 10px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+            .nav-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        .nav-menu ul { list-style: none; }
+        .nav-menu li a {
+            display: block; padding: 12px 16px; text-decoration: none; color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem; border-radius: 8px; transition: background 0.2s, color 0.2s;
+        }
+        .nav-menu li a:hover { background: rgba(255, 255, 255, 0.1); color: #25e6c5; }
+
+        .nav-controls { display: flex; align-items: center; gap: 16px; position: relative; min-width: 0; }
+
+        .gear-btn {
+            display: flex; justify-content: center; align-items: center; width: 42px; height: 42px;
+            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%; color: #25e6c5; cursor: pointer; backdrop-filter: blur(5px); transition: all 0.3s ease;
+        }
+        .gear-btn:hover { background: rgba(0, 0, 0, 0.5); border-color: rgba(255, 255, 255, 0.25); transform: rotate(90deg); }
+        .gear-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+        .settings-panel {
+            position: absolute; top: 55px; right: 0; width: 240px;
+            background: rgba(15, 15, 20, 0.85); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px; padding: 20px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7); opacity: 0; visibility: hidden; transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .settings-panel.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        .setting-item { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .setting-item:last-child { margin-bottom: 0; }
+        .setting-header { display: flex; justify-content: space-between; font-size: 0.8rem; color: #ccc; }
+
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.15); border-radius: 2px; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%;
+            background: #25e6c5; margin-top: -5px; box-shadow: 0 0 8px rgba(37, 230, 197, 0.8); transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        .status-badge {
+            display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px; font-size: 0.85rem; color: #eee; backdrop-filter: blur(5px);
+            cursor: pointer; user-select: none; transition: background-color 0.3s ease, border-color 0.3s ease;
+            min-width: 0; flex-shrink: 1;
+        }
+        .status-badge:hover {
+            color: #fff;
+            background: rgba(37, 230, 197, 0.15);
+            border-color: rgba(37, 230, 197, 0.5);
+            box-shadow: 0 5px 15px rgba(37, 230, 197, 0.3);
+        }
+        .status-badge .dot { width: 6px; height: 6px; background: #25e6c5; border-radius: 50%; transition: background 0.3s; }
+        .status-badge #ipText { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+        .status-badge.copied { border-color: #25e6c5; background: rgba(37, 230, 197, 0.15); }
+        .status-badge.copied #ipText { color: #25e6c5; }
+
+        @keyframes bounceClick {
+            0% { transform: scale(1); } 40% { transform: scale(0.85); }
+            70% { transform: scale(1.05); } 100% { transform: scale(1); }
+        }
+        .status-badge.animate { animation: bounceClick 0.4s cubic-bezier(0.28, 0.84, 0.42, 1) forwards; }
+
+        .hero {
+            position: relative; z-index: 10; height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; pointer-events: none;
+        }
+        .hero h1 {
+            font-size: 5rem; font-weight: 900; letter-spacing: 4px; margin-bottom: 12px; color: #fff;
+            text-shadow: 4px 4px 0px rgba(0,0,0,0.8), 0 0 30px rgba(0,0,0,0.6);
+        }
+        .hero p {
+            font-size: 1.2rem; color: #ddd; font-weight: 500; letter-spacing: 2px;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+        }
+
+        .content-section {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            padding: 120px 40px 60px;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .glass-card {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            margin-top: 40px;
+        }
+
+        .glass-card h2 {
+            font-size: 2.5rem;
+            color: #25e6c5;
+            margin-bottom: 24px;
+            text-shadow: 0 0 20px rgba(37, 230, 197, 0.4);
+        }
+
+        .glass-card p {
+            font-size: 1.1rem;
+            color: #aaa;
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 800px;
+            margin: 40px auto;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .special-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .special-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.2rem;
+            color: #fff;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .special-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            background: linear-gradient(to right, #ff0055, #ffaa00, #00ffaa, #00aaff, #aa00ff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            animation: text-rainbow 3s linear infinite;
+        }
+        @keyframes text-rainbow {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .feature-card p {
+            font-size: 0.9rem;
+            color: #888;
+            line-height: 1.6;
+        }
+
+        .special-card p {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            background: linear-gradient(to right, #ff0055, #ffaa00, #00ffaa, #00aaff, #aa00ff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            animation: text-rainbow 3s linear infinite;
+        }
+        @keyframes text-rainbow {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .card-link{
+            display: block;
+            width: 100%;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .card-link:hover{
+            border-color: rgba(37, 230, 197, 0.5) ;
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+
+        .footer {
+            margin-top: 800px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .footer         p{
+            font-size: 0.9rem;
+            color: #666;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+
+        .github-link {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #888;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .github-link:hover {
+            color: #fff;
+            background: rgba(37, 230, 197, 0.15);
+            border-color: rgba(37, 230, 197, 0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(37, 230, 197, 0.3);
+        }
+
+        .github-link svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+        .qq-link {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #888;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .qq-link:hover {
+            color: #fff;
+            background: rgba(37, 230, 197, 0.15);
+            border-color: rgba(37, 230, 197, 0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(37, 230, 197, 0.3);
+        }
+
+        .qq-link svg {
+            width: 24px;
+            height: 24px;
+            fill:rgba(255, 255, 255, 0.5) ;
+        }
+        @media (max-width: 768px) {
+            .navbar { padding: 0 16px; }
+            .nav-left { gap: 10px; min-width: 0; }
+            .nav-controls { gap: 10px; min-width: 0; }
+            .logo-text-cn { font-size: 1.05rem; }
+            .logo-text-en { font-size: 0.55rem; }
+            .status-badge { max-width: 46vw; padding: 8px 12px; font-size: 0.75rem; min-width: 0; }
+            .status-badge #ipText { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+            .hero h1 { font-size: 3.5rem; letter-spacing: 2px;}
+            .content-section { padding: 100px 20px 40px; }
+            .glass-card { padding: 30px; }
+        }
+
+
+    
+        /* ================= iOS 兼容性修复 ================= */
+        /* 3.1 移除 iOS Safari 点击时的灰色高亮遮罩 */
+        * { -webkit-tap-highlight-color: transparent; }
+
+        /* 3.2 重置 iOS 默认按钮外观：修复左上角菜单/齿轮按钮被 Safari 原生椭圆按钮样式圈住、线条变形 */
+        button { -webkit-appearance: none; appearance: none; -webkit-user-select: none; user-select: none; }
+        .menu-btn, .gear-btn { -webkit-appearance: none; appearance: none; }
+
+        /* 3.3 按钮与圆形图标在 iOS flex 中禁止被压缩塌陷，保持正圆 */
+        .menu-btn, .gear-btn, .github-link, .qq-link { flex-shrink: 0; }
+
+        /* 3.4 隐藏 iOS 滚动条：消除右下角图标旁那条灰色竖线"尾巴" */
+        html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0 !important; height: 0 !important; background: transparent !important; display: none; }
+        html, body { scrollbar-width: none; -ms-overflow-style: none; }
+
+        /* 3.5 底部安全区适配：图标避开 iPhone 底部 Home Indicator 黑条，不再贴地被遮挡 */
+        .footer { padding-bottom: calc(30px + env(safe-area-inset-bottom)); }
+
+        /* 3.6 图标 SVG 规范显示：display:block 去除行内基线间隙, flex 内不被拉伸变形 */
+        .menu-btn span { display: block; }
+        .gear-btn svg, .github-link svg, .qq-link svg { display: block; flex-shrink: 0; max-width: 100%; }
+        /* QQ 图标 SVG 内联了 256x256 属性，这里强制用 CSS 锁死尺寸，防止撑出图标框 */
+        .qq-link svg { width: 24px !important; height: 24px !important; }
+
+        /* 3.7 移动端导航栏在安全区顶部留白，避免状态栏遮挡 (配合 viewport-fit=cover) */
+        @media (max-width: 768px) {
+            .navbar { padding-top: env(safe-area-inset-top); height: auto; min-height: 64px; }
+        }
+        /* ============== iOS 兼容性修复 结束 ============== */
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+<div class="vignette"></div>
+
+<nav class="navbar" id="navbar">
+    <div class="nav-left">
+        <button id="menuBtn" class="menu-btn" title="菜单">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <a href="#" class="logo">
+            <div class="logo-dot"></div>
+            <div class="logo-text-group">
+                <span class="logo-text-cn">赣一神人会</span>
+                <span class="logo-text-en">GANYI GODS CLUB</span>
+            </div>
+        </a>
+
+        <div id="navMenu" class="nav-menu">
+            <ul>
+                <li><a href="#" >首页</a></li>
+                <li><a href="#" id="link-resource">资源</a></li>
+                <li><a href="#">反馈</a></li>
+                <li><a href="#" id="mcplugin">文档</a></li>
+                <li><a href="#">关于我们</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="nav-controls">
+        <div style="position: relative;">
+            <button id="gearBtn" class="gear-btn" title="设置">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path>
+                </svg>
+            </button>
+
+            <div id="settingsPanel" class="settings-panel">
+                <div class="setting-item">
+                    <div class="setting-header">
+                        <span>背景模糊</span>
+                        <span id="blurVal">0px</span>
+                    </div>
+                    <input type="range" id="blurSlider" min="0" max="15" value="0" step="1">
+                </div>
+                <div class="setting-item">
+                    <div class="setting-header">
+                        <span>旋转速度</span>
+                        <span id="speedVal">1x</span>
+                    </div>
+                    <input type="range" id="speedSlider" min="0.2" max="3" value="1" step="0.1">
+                </div>
+            </div>
+        </div>
+
+        <div class="status-badge" id="ipBadge" title="点击复制服务器IP">
+            <div class="dot"></div>
+            <span id="ipText">IP:mc.notchwlmc.us.ci</span>
+        </div>
+    </div>
+</nav>
+
+<div class="hero">
+    <h1>欢迎回来</h1>
+    <p>赣一中的神人们</p>
+</div>
+
+<div class="content-section">
+    <div class="glass-card">
+        <h2>服务器简介</h2>
+        <p>欢迎想变成神人的人加入！此服务器为原版生存服务器，你可以在这里尽情给腐竹打工。</p>
+        <p>
+           享受当黑奴的快乐!
+        </p>
+    </div>
+
+    <div class="features-grid">
+        <!-- 玩法 1 -->
+        <div class="feature-card">
+            <div class="feature-icon">️</div>
+            <h3>硬核生存</h3>
+            <p>内有自研Resdence和PubliicTP,为你的生存之旅保驾护航。</p>
+        </div>
+        <!-- 玩法 2 -->
+        <div class="feature-card">
+            <div class="feature-icon">️</div>
+            <h3>粘液科技</h3>
+            <p>高度自由的自动化流水线，从基础挖矿到全自动农场，体验工业时代的魅力。</p>
+        </div>
+        <!-- 玩法 3 -->
+        <div class="feature-card">
+            <div class="feature-icon"></div>
+            <h3>自由社交</h3>
+            <p>结交志同道合的伙伴，绑定你们的专属关系</p>
+        </div>
+        <!-- 玩法 4 -->
+        <a href="https://ciallo.cc/" class="card-link"target="_blank" >
+        <div class="special-card">
+            <div class="feature-icon"></div>
+            <h3>腐竹是香香软软的小南梁</h3>
+            <p>腐竹正在Ciallo～ (∠・ω< )⌒★</p>
+        </div>
+        </a>
+    </div>
+
+
+    <footer class="footer">
+        <p>&copy; 2025  Created by Notchwlmcs. All rights reserved.</p>
+        <a href="https://github.com/Notchwlmc" target="_blank" class="github-link" title="访问我的 GitHub" >
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+            </svg>
+        </a>
+            <a href="https://qun.qq.com/universal-share/share?ac=1&authKey=GqJmZonrmk5PX9kR9p5mI9U3MdLtufAn2ZgMymV7%2BfrYG43qVrrU9C1dMWv4VrC0&busi_data=eyJncm91cENvZGUiOiIyOTUyODY5OTMiLCJ0b2tlbiI6InUxMnJmOG9ENmpjbmZRS3B2cjErUFlQSGtLMnBaeXFnRHZvMGp5ZG42Zk5Wd08yS1paM2dXcFU5RzUwMmdTdXAiLCJ1aW4iOiIxNjM3Njk1OTEzIn0%3D&data=rhihtQaBPgmXln2qOwsb6ZXoPXWSrzypKOCHca0gxOhEUGvsv_LQC6P_xoLY8gILMQUR0Xh8A58nqjQm4TWMFg&svctype=4&tempid=h5_group_info" target="_blank" class="qq-link" title="加入我们,295286993" >
+                <svg t="1792808590054" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1846" data-darkreader-inline-fill="" width="256" height="256"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64z m210.5 612.4c-11.5 1.4-44.9-52.7-44.9-52.7 0 31.3-16.2 72.2-51.1 101.8 16.9 5.2 54.9 19.2 45.9 34.4-7.3 12.3-125.6 7.9-159.8 4-34.2 3.8-152.5 8.3-159.8-4-9.1-15.2 28.9-29.2 45.8-34.4-35-29.5-51.1-70.4-51.1-101.8 0 0-33.4 54.1-44.9 52.7-5.4-0.7-12.4-29.6 9.4-99.7 10.3-33 22-60.5 40.2-105.8-3.1-116.9 45.3-215 160.4-215 113.9 0 163.3 96.1 160.4 215 18.1 45.2 29.9 72.8 40.2 105.8 21.7 70.1 14.6 99.1 9.3 99.7z" p-id="1847"></path>
+                </svg>
+            </a>
+    </footer>
+</div>
+
+<script>
+    const scene = new THREE.Scene();
+    const container = document.getElementById('canvas-container');
+
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 0, 0);
+    camera.rotation.x = -0.05;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+
+    const textureLoader = new THREE.TextureLoader();
+    const materials = [
+        new THREE.MeshBasicMaterial({ map: textureLoader.load('panorama_1.png') }),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load('panorama_3.png') }),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load('panorama_4.png') }),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load('panorama_5.png') }),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load('panorama_0.png') }),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load('panorama_2.png') })
+    ];
+
+    const geometry = new THREE.BoxGeometry(100, 100, 100);
+    materials.forEach(mat => { mat.side = THREE.BackSide; });
+
+    const skybox = new THREE.Mesh(geometry, materials);
+    scene.add(skybox);
+
+    let baseSpeed = 0.0003;
+    let currentSpeedMultiplier = 1;
+
+    function animate() {
+        requestAnimationFrame(animate);
+        skybox.rotation.y += (baseSpeed * currentSpeedMultiplier);
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    const navbar = document.getElementById('navbar');
+    const menuBtn = document.getElementById('menuBtn');
+    const navMenu = document.getElementById('navMenu');
+    const gearBtn = document.getElementById('gearBtn');
+    const settingsPanel = document.getElementById('settingsPanel');
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+
+    menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuBtn.classList.toggle('active');
+        navMenu.classList.toggle('show');
+        settingsPanel.classList.remove('show');
+    });
+
+    gearBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        settingsPanel.classList.toggle('show');
+        menuBtn.classList.remove('active');
+        navMenu.classList.remove('show');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!navMenu.contains(e.target) && e.target !== menuBtn) {
+            menuBtn.classList.remove('active');
+            navMenu.classList.remove('show');
+        }
+        if (!settingsPanel.contains(e.target) && e.target !== gearBtn) {
+            settingsPanel.classList.remove('show');
+        }
+    });
+
+    navMenu.addEventListener('click', (e) => e.stopPropagation());
+    settingsPanel.addEventListener('click', (e) => e.stopPropagation());
+
+    const blurSlider = document.getElementById('blurSlider');
+    const blurVal = document.getElementById('blurVal');
+    blurSlider.addEventListener('input', (e) => {
+        const val = e.target.value;
+        container.style.filter = `blur(${val}px)`;
+        blurVal.textContent = `${val}px`;
+    });
+
+    const speedSlider = document.getElementById('speedSlider');
+    const speedVal = document.getElementById('speedVal');
+    speedSlider.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        currentSpeedMultiplier = val;
+        speedVal.textContent = `${val.toFixed(1)}x`;
+    });
+
+    const ipBadge = document.getElementById('ipBadge');
+    const ipText = document.getElementById('ipText');
+    const ipAddress = 'mc.notchwlmc.us.ci';
+
+    ipBadge.addEventListener('click', async () => {
+        ipBadge.classList.remove('animate');
+        void ipBadge.offsetWidth;
+        ipBadge.classList.add('animate');
+
+        try {
+            await navigator.clipboard.writeText(ipAddress);
+            ipText.textContent = '已复制!';
+            ipBadge.classList.add('copied');
+            setTimeout(() => {
+                ipText.textContent = `IP:${ipAddress}`;
+                ipBadge.classList.remove('copied');
+            }, 2000);
+        } catch (err) {
+            const textarea = document.createElement('textarea');
+            textarea.value = ipAddress;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            ipText.textContent = '已复制!';
+            ipBadge.classList.add('copied');
+            setTimeout(() => {
+                ipText.textContent = `IP:${ipAddress}`;
+                ipBadge.classList.remove('copied');
+            }, 2000);
+        }
+    });
+</script>
+<script src="script.js"></script>
+</body>
+</html>
