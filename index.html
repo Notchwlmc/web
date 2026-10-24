@@ -596,14 +596,32 @@
     renderer.setPixelRatio(window.devicePixelRatio);
     container.appendChild(renderer.domElement);
 
+    /* ===== 资源路径修复 =====
+     * 自动取当前页面所在目录，兼容：
+     *   https://user.github.io/web/        → /web/
+     *   https://user.github.io/web/index.html → /web/
+     *   file:///.../web/index.html          → .../web/
+     */
+    const ASSET_BASE = (() => {
+        const p = window.location.pathname;
+        return p.endsWith('/') ? p : p.replace(/[^/]+$/, '');
+    })();
+
     const textureLoader = new THREE.TextureLoader();
+    const tex = (file) => textureLoader.load(
+        ASSET_BASE + file,
+        (t) => { /* 加载成功 */ },
+        undefined,
+        () => console.error('[纹理加载失败]', ASSET_BASE + file)
+    );
+
     const materials = [
-        new THREE.MeshBasicMaterial({ map: textureLoader.load('panorama_1.png') }),
-        new THREE.MeshBasicMaterial({ map: textureLoader.load('panorama_3.png') }),
-        new THREE.MeshBasicMaterial({ map: textureLoader.load('panorama_4.png') }),
-        new THREE.MeshBasicMaterial({ map: textureLoader.load('panorama_5.png') }),
-        new THREE.MeshBasicMaterial({ map: textureLoader.load('panorama_0.png') }),
-        new THREE.MeshBasicMaterial({ map: textureLoader.load('panorama_2.png') })
+        new THREE.MeshBasicMaterial({ map: tex('panorama_1.png') }),
+        new THREE.MeshBasicMaterial({ map: tex('panorama_3.png') }),
+        new THREE.MeshBasicMaterial({ map: tex('panorama_4.png') }),
+        new THREE.MeshBasicMaterial({ map: tex('panorama_5.png') }),
+        new THREE.MeshBasicMaterial({ map: tex('panorama_0.png') }),
+        new THREE.MeshBasicMaterial({ map: tex('panorama_2.png') })
     ];
 
     const geometry = new THREE.BoxGeometry(100, 100, 100);
