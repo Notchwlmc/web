@@ -19,10 +19,7 @@ function init3D() {
     textureLoader.setCrossOrigin('anonymous');
 
     const materials = [];
-    
-    // ==========================================
-    // 如果你的仓库名/路径不一样，请修改下面 6 行
-    // ==========================================
+
     const panoramaFiles = [
         'https://cdn.jsdelivr.net/gh/Notchwlmc/web@main/panorama_1.png',
         'https://cdn.jsdelivr.net/gh/Notchwlmc/web@main/panorama_3.png',
