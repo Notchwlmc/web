@@ -37,16 +37,12 @@
             -webkit-touch-callout: none;
             touch-action: manipulation;
             overscroll-behavior-y: contain;
+            -webkit-overflow-scrolling: touch;
         }
 
         #canvas-container {
             position: fixed; inset: 0; z-index: 1;
-            transition: filter 0.3s ease;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            will-change: filter;
+            pointer-events: none;
         }
 
         .vignette {
@@ -59,17 +55,13 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 80px;
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 40px; z-index: 1000;
-            background: rgba(15, 15, 20, 0.35);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            background: rgba(15, 15, 20, 0.75); /* 固定深色，取消变色 */
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-bottom: none;
-            transition: background 0.4s ease;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
         }
-        .navbar.scrolled { background: rgba(10, 10, 15, 0.85); }
 
         .navbar::after {
             content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 1px;
@@ -465,6 +457,9 @@
                 height: auto;
                 min-height: 64px;
                 gap: 10px;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: rgba(15, 15, 20, 0.95); /* 移动端直接用高不透明度实色，杜绝模糊引发的频闪 */
             }
             .nav-left { gap: 8px; min-width: 0; flex-shrink: 1; }
             .nav-controls { gap: 8px; flex-shrink: 0; }
@@ -487,7 +482,7 @@
                 padding: calc(100px + env(safe-area-inset-top)) 20px 40px;
                 backdrop-filter: none;
                 -webkit-backdrop-filter: none;
-                background: rgba(10, 10, 15, 0.92);
+                background: rgba(10, 10, 15, 0.95);
             }
             .glass-card { padding: 30px; }
         }
@@ -636,7 +631,8 @@
     camera.position.set(0, 0, 0);
     camera.rotation.x = -0.05;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    // 初始设置一次大小
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
@@ -695,14 +691,20 @@
     animate();
 
     let resizeRaf = null;
+    let lastWidth = window.innerWidth;
 
     function updateSize() {
         const w = window.innerWidth;
         const h = window.innerHeight;
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-        renderer.setSize(w, h);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        // 只有在宽度真正改变（如横竖屏切换）时才重新设置尺寸
+        // 过滤掉 iOS 滑动时地址栏伸缩触发的高度变化，从而彻底杜绝频闪
+        if (w !== lastWidth) {
+            lastWidth = w;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        }
     }
 
     function scheduleResize() {
@@ -717,19 +719,10 @@
         window.visualViewport.addEventListener('resize', scheduleResize);
     }
 
-    const navbar = document.getElementById('navbar');
     const menuBtn = document.getElementById('menuBtn');
     const navMenu = document.getElementById('navMenu');
     const gearBtn = document.getElementById('gearBtn');
     const settingsPanel = document.getElementById('settingsPanel');
-
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
-    });
 
     menuBtn.addEventListener('click', (e) => {
         e.stopPropagation();
