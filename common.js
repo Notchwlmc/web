@@ -44,14 +44,10 @@ let time = 0;
 
 function animate() {
     requestAnimationFrame(animate);
-
     time += 0.001 * currentSpeedMultiplier;
-
     camera.rotation.x = -0.05 + Math.sin(time * 0.5) * 0.02;
     camera.rotation.y = Math.sin(time * 0.3) * 0.05;
-
     skybox.rotation.y -= 0.0002 * currentSpeedMultiplier;
-
     renderer.render(scene, camera);
 }
 animate();
@@ -66,97 +62,9 @@ function scheduleResize() {
     if (resizeRaf) cancelAnimationFrame(resizeRaf);
     resizeRaf = requestAnimationFrame(updateSize);
 }
-
 window.addEventListener('resize', scheduleResize);
 window.addEventListener('orientationchange', scheduleResize);
 if (window.visualViewport) { window.visualViewport.addEventListener('resize', scheduleResize); }
-
-const navbar = document.getElementById('navbar');
-const menuBtn = document.getElementById('menuBtn');
-const navMenu = document.getElementById('navMenu');
-const gearBtn = document.getElementById('gearBtn');
-const settingsPanel = document.getElementById('settingsPanel');
-
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) { navbar.classList.add('scrolled'); } else { navbar.classList.remove('scrolled'); }
-});
-
-menuBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    menuBtn.classList.toggle('active');
-    navMenu.classList.toggle('show');
-    settingsPanel.classList.remove('show');
-});
-
-gearBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    settingsPanel.classList.toggle('show');
-    menuBtn.classList.remove('active');
-    navMenu.classList.remove('show');
-});
-
-document.addEventListener('click', (e) => {
-    if (!navMenu.contains(e.target) && e.target !== menuBtn) {
-        menuBtn.classList.remove('active');
-        navMenu.classList.remove('show');
-    }
-    if (!settingsPanel.contains(e.target) && e.target !== gearBtn) {
-        settingsPanel.classList.remove('show');
-    }
-});
-
-navMenu.addEventListener('click', (e) => e.stopPropagation());
-settingsPanel.addEventListener('click', (e) => e.stopPropagation());
-
-const blurSlider = document.getElementById('blurSlider');
-const blurVal = document.getElementById('blurVal');
-let blurRaf = null;
-blurSlider.addEventListener('input', (e) => {
-    const val = e.target.value;
-    blurVal.textContent = `${val}px`;
-    if (blurRaf) cancelAnimationFrame(blurRaf);
-    blurRaf = requestAnimationFrame(() => {
-        container.style.filter = val === '0' ? 'none' : `blur(${val}px)`;
-    });
-});
-
-const speedSlider = document.getElementById('speedSlider');
-const speedVal = document.getElementById('speedVal');
-speedSlider.addEventListener('input', (e) => {
-    const val = parseFloat(e.target.value);
-    currentSpeedMultiplier = val;
-    speedVal.textContent = `${val.toFixed(1)}x`;
-});
-
-const ipBadge = document.getElementById('ipBadge');
-const ipText = document.getElementById('ipText');
-const ipAddress = 'mc.notchwlmc.us.ci';
-
-async function copyText(text) {
-    if (navigator.clipboard && window.isSecureContext) {
-        try { await navigator.clipboard.writeText(text); return true; } catch (_) {}
-    }
-    const ta = document.createElement('textarea');
-    ta.value = text; ta.setAttribute('readonly', '');
-    ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;padding:0;border:none;outline:none;box-shadow:none;background:transparent;opacity:0;font-size:16px;';
-    document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0, text.length);
-    let ok = false;
-    try { ok = document.execCommand('copy'); } catch (_) { ok = false; }
-    document.body.removeChild(ta);
-    return ok;
-}
-
-ipBadge.addEventListener('click', async () => {
-    ipBadge.classList.remove('animate'); void ipBadge.offsetWidth; ipBadge.classList.add('animate');
-    const ok = await copyText(ipAddress);
-    if (!ok) {
-        ipText.textContent = '复制失败';
-        setTimeout(() => { ipText.textContent = `IP:${ipAddress}`; }, 2000);
-        return;
-    }
-    ipText.textContent = '已复制!'; ipBadge.classList.add('copied');
-    setTimeout(() => { ipText.textContent = `IP:${ipAddress}`; ipBadge.classList.remove('copied'); }, 2000);
-});
 
 function getCommonNavHTML(titleCn, titleEn) {
     return `
@@ -191,8 +99,6 @@ function getCommonNavHTML(titleCn, titleEn) {
                         <div class="setting-header"><span>背景模糊</span><span id="blurVal">10px</span></div>
                         <input type="range" id="blurSlider" min="0" max="15" value="10" step="1">
                     </div>
-                    <div class="setting-item">
-                    </div>
                 </div>
             </div>
             <div class="status-badge" id="ipBadge" title="点击复制服务器IP">
@@ -216,4 +122,99 @@ function getCommonFooterHTML() {
         </a>
     </footer>
     `;
+}
+
+function initUI() {
+    const navbar = document.getElementById('navbar');
+    const menuBtn = document.getElementById('menuBtn');
+    const navMenu = document.getElementById('navMenu');
+    const gearBtn = document.getElementById('gearBtn');
+    const settingsPanel = document.getElementById('settingsPanel');
+
+    if (navbar) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) { navbar.classList.add('scrolled'); } else { navbar.classList.remove('scrolled'); }
+        });
+    }
+
+    if (menuBtn) {
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuBtn.classList.toggle('active');
+            navMenu.classList.toggle('show');
+            if (settingsPanel) settingsPanel.classList.remove('show');
+        });
+    }
+
+    if (gearBtn) {
+        gearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            settingsPanel.classList.toggle('show');
+            if (menuBtn) menuBtn.classList.remove('active');
+            if (navMenu) navMenu.classList.remove('show');
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (navMenu && !navMenu.contains(e.target) && e.target !== menuBtn) {
+            if (menuBtn) menuBtn.classList.remove('active');
+            navMenu.classList.remove('show');
+        }
+        if (settingsPanel && !settingsPanel.contains(e.target) && e.target !== gearBtn) {
+            settingsPanel.classList.remove('show');
+        }
+    });
+
+    if (navMenu) navMenu.addEventListener('click', (e) => e.stopPropagation());
+    if (settingsPanel) settingsPanel.addEventListener('click', (e) => e.stopPropagation());
+
+    const blurSlider = document.getElementById('blurSlider');
+    const blurVal = document.getElementById('blurVal');
+    let blurRaf = null;
+    if (blurSlider) {
+        blurSlider.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (blurVal) blurVal.textContent = `${val}px`;
+            if (blurRaf) cancelAnimationFrame(blurRaf);
+            blurRaf = requestAnimationFrame(() => {
+                if (container) container.style.filter = val === '0' ? 'none' : `blur(${val}px)`;
+            });
+        });
+    }
+
+    const ipBadge = document.getElementById('ipBadge');
+    const ipText = document.getElementById('ipText');
+    const ipAddress = 'mc.notchwlmc.us.ci';
+
+    async function copyText(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+            try { await navigator.clipboard.writeText(text); return true; } catch (_) {}
+        }
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.setAttribute('readonly', '');
+        ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;padding:0;border:none;outline:none;box-shadow:none;background:transparent;opacity:0;font-size:16px;';
+        document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0, text.length);
+        let ok = false;
+        try { ok = document.execCommand('copy'); } catch (_) { ok = false; }
+        document.body.removeChild(ta);
+        return ok;
+    }
+
+    if (ipBadge) {
+        ipBadge.addEventListener('click', async () => {
+            ipBadge.classList.remove('animate'); void ipBadge.offsetWidth; ipBadge.classList.add('animate');
+            const ok = await copyText(ipAddress);
+            if (!ok) {
+                if (ipText) ipText.textContent = '复制失败';
+                setTimeout(() => { if (ipText) ipText.textContent = `IP:${ipAddress}`; }, 2000);
+                return;
+            }
+            if (ipText) ipText.textContent = '已复制!'; 
+            ipBadge.classList.add('copied');
+            setTimeout(() => { 
+                if (ipText) ipText.textContent = `IP:${ipAddress}`; 
+                ipBadge.classList.remove('copied'); 
+            }, 2000);
+        });
+    }
 }
