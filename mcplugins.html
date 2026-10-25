@@ -411,7 +411,6 @@
     const scene = new THREE.Scene();
     const container = document.getElementById('canvas-container');
 
-    // 修复：将 camera.far 从 1000 调大到 5000，防止天空盒被裁剪出黑块
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
     camera.position.set(0, 0, 0);
 
@@ -423,26 +422,30 @@
     renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); }, false);
 
     const textureLoader = new THREE.TextureLoader();
-    function loadPanorama(url) {
-        const tex = textureLoader.load(url);
-        tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter;
-        tex.generateMipmaps = false; tex.wrapS = THREE.ClampToEdgeWrapping; tex.wrapT = THREE.ClampToEdgeWrapping;
-        return tex;
-    }
-
-    const materials = [
-        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_1.png') }),
-        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_3.png') }),
-        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_4.png') }),
-        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_5.png') }),
-        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_0.png') }),
-        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_2.png') })
+    const materials = [];
+    const panoramaFiles = [
+        'panorama_1.png', 'panorama_3.png',
+        'panorama_4.png', 'panorama_5.png',
+        'panorama_0.png', 'panorama_2.png'
     ];
+
+    panoramaFiles.forEach(file => {
+        const mat = new THREE.MeshBasicMaterial({ color: 0x0a0a0f, side: THREE.BackSide });
+        const tex = textureLoader.load('./' + file, () => {
+            mat.map = tex;
+            mat.color.setHex(0xffffff);
+            mat.needsUpdate = true;
+        });
+        tex.minFilter = THREE.LinearFilter; 
+        tex.magFilter = THREE.LinearFilter;
+        tex.generateMipmaps = false; 
+        tex.wrapS = THREE.ClampToEdgeWrapping; 
+        tex.wrapT = THREE.ClampToEdgeWrapping;
+        materials.push(mat);
+    });
 
     scene.background = new THREE.Color(0x0a0a0f);
     const geometry = new THREE.BoxGeometry(2000, 2000, 2000);
-    materials.forEach(mat => { mat.side = THREE.BackSide; });
-
     const skybox = new THREE.Mesh(geometry, materials);
     scene.add(skybox);
 
