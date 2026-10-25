@@ -107,9 +107,9 @@
         </a>
         <div id="navMenu" class="nav-menu">
             <ul>
-                <li><a href="index.html">首页概览</a></li>
-                <li><a href="javascript:void(0)" onclick="loadPage('plugins', this)">插件中心</a></li>
-                <li><a href="javascript:void(0)" onclick="loadPage('mods', this)">模组中心</a></li>
+                <li><a href="index.html"><span class="material-icons" style="font-size: 18px;">home</span> 首页概览</a></li>
+                <li><a href="javascript:void(0)" class="nav-tab-link" data-tab="plugins" onclick="loadPage('plugins', this)"><span class="material-icons" style="font-size: 18px;">layers</span> 插件中心</a></li>
+                <li><a href="javascript:void(0)" class="nav-tab-link" data-tab="mods" onclick="loadPage('mods', this)"><span class="material-icons" style="font-size: 18px;">extension</span> 模组中心</a></li>
             </ul>
         </div>
     </div>
@@ -211,16 +211,18 @@
             }, 300);
 
             document.querySelectorAll('.nav-menu li a').forEach(item => item.classList.remove('active'));
-            if (element && element.classList.contains('tab-btn')) {
-                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                element.classList.add('active');
-                const navTarget = document.querySelector(`.nav-menu a[onclick*="${pageName}"]`);
-                if (navTarget) navTarget.classList.add('active');
-            } else if (element) {
-                element.classList.add('active');
-                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                const tabTarget = document.getElementById('tab-' + pageName);
-                if (tabTarget) tabTarget.classList.add('active');
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            if (element) {
+                if (element.classList.contains('tab-btn')) {
+                    element.classList.add('active');
+                    const navTarget = document.querySelector(`.nav-menu a[data-tab="${pageName}"]`);
+                    if (navTarget) navTarget.classList.add('active');
+                } else {
+                    element.classList.add('active');
+                    const tabTarget = document.getElementById('tab-' + pageName);
+                    if (tabTarget) tabTarget.classList.add('active');
+                }
             } else {
                 const tabTarget = document.getElementById('tab-' + pageName);
                 if (tabTarget) tabTarget.classList.add('active');
@@ -237,11 +239,19 @@
 
         if (pages[currentTab]) {
             const tabBtn = document.getElementById('tab-' + currentTab);
-            if (tabBtn) tabBtn.classList.add('active');
+            if (tabBtn) {
+                tabBtn.classList.add('active');
+                const navTarget = document.querySelector(`.nav-menu a[data-tab="${currentTab}"]`);
+                if (navTarget) navTarget.classList.add('active');
+            }
             contentArea.innerHTML = pages[currentTab];
         } else {
             const defaultBtn = document.getElementById('tab-plugins');
-            if (defaultBtn) defaultBtn.classList.add('active');
+            if (defaultBtn) {
+                defaultBtn.classList.add('active');
+                const navTarget = document.querySelector('.nav-menu a[data-tab="plugins"]');
+                if (navTarget) navTarget.classList.add('active');
+            }
             contentArea.innerHTML = pages['plugins'];
         }
     });
