@@ -8,13 +8,52 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .main-container { width: 100%; max-width: 1000px; flex: 1; }
-        .search-header { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 30px; margin-bottom: 30px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+        .search-header { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 30px; margin-bottom: 20px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
         .search-header h2 { font-size: 1.5rem; margin-bottom: 20px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         .search-box { display: flex; gap: 15px; }
         input[type="text"] { flex: 1; padding: 14px 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); background-color: rgba(0, 0, 0, 0.3); color: white; outline: none; font-size: 1rem; transition: all 0.3s; }
         input[type="text"]:focus { border-color: #25e6c5; box-shadow: 0 0 15px rgba(37, 230, 197, 0.2); background-color: rgba(0, 0, 0, 0.5); }
         button.search-btn { padding: 0 30px; background-color: #25e6c5; color: #000; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 1rem; white-space: nowrap; transition: all 0.3s; }
         button.search-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(37, 230, 197, 0.4); }
+
+        .tabs-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .tab-btn {
+            padding: 12px 30px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            color: #aaa;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: rgba(37, 230, 197, 0.15);
+            border-color: rgba(37, 230, 197, 0.5);
+            color: #25e6c5;
+            box-shadow: 0 0 15px rgba(37, 230, 197, 0.2);
+        }
+
         #content-area { width: 100%; animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -30,6 +69,7 @@
         .stat-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 30px; flex: 1; min-width: 200px; border-radius: 16px; text-align: center; }
         .stat-card h3 { font-size: 2.5rem; color: #25e6c5; text-shadow: 0 0 20px rgba(37, 230, 197, 0.4); margin-bottom: 8px; }
         .stat-card p { color: #aaa; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; }
+        
         .loading { text-align: center; padding: 50px; color: #25e6c5; font-size: 1.2rem; display: flex; flex-direction: column; align-items: center; gap: 15px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .spin-icon { animation: spin 1s linear infinite; }
@@ -38,6 +78,8 @@
             .search-header { padding: 20px; }
             .search-box { flex-direction: column; }
             button.search-btn { padding: 14px; }
+            .tabs-container { justify-content: center; gap: 10px; }
+            .tab-btn { flex: 1; justify-content: center; padding: 12px 0; font-size: 0.9rem; }
             .plugin-card { padding: 16px; flex-direction: column; align-items: flex-start; }
             .card-icon { width: 48px; height: 48px; margin-right: 0; margin-bottom: 15px; }
             .card-info h3 { font-size: 1.15rem; }
@@ -99,6 +141,16 @@
                 <button class="search-btn">搜索</button>
             </div>
         </div>
+        
+        <div class="tabs-container">
+            <button class="tab-btn" id="tab-plugins" onclick="loadPage('plugins', this)">
+                <span class="material-icons" style="font-size: 18px;">layers</span> 插件中心
+            </button>
+            <button class="tab-btn" id="tab-mods" onclick="loadPage('mods', this)">
+                <span class="material-icons" style="font-size: 18px;">extension</span> 模组中心
+            </button>
+        </div>
+
         <div id="content-area"></div>
     </div>
 
@@ -119,14 +171,6 @@
         const contentArea = document.getElementById('content-area');
         
         const pages = {
-            'home': `
-                <h2 style="margin-bottom: 10px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">欢迎来到资源中心</h2>
-                <p style="color: #aaa; line-height: 1.6;">这里是最新更新的服务器资源统计。</p>
-                <div class="home-stats">
-                    <div class="stat-card"><h3>2</h3><p>收录插件总数</p></div>
-                    <div class="stat-card"><h3>0</h3><p>累计下载量</p></div>
-                </div>
-            `,
             'plugins': `
                 <a href="plugins-detail.html" style="text-decoration: none; color: inherit; display: block;">
                     <div class="plugin-card">
@@ -167,7 +211,20 @@
             }, 300);
 
             document.querySelectorAll('.nav-menu li a').forEach(item => item.classList.remove('active'));
-            if (element) { element.classList.add('active'); }
+            if (element && element.classList.contains('tab-btn')) {
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                element.classList.add('active');
+                const navTarget = document.querySelector(`.nav-menu a[onclick*="${pageName}"]`);
+                if (navTarget) navTarget.classList.add('active');
+            } else if (element) {
+                element.classList.add('active');
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                const tabTarget = document.getElementById('tab-' + pageName);
+                if (tabTarget) tabTarget.classList.add('active');
+            } else {
+                const tabTarget = document.getElementById('tab-' + pageName);
+                if (tabTarget) tabTarget.classList.add('active');
+            }
 
             const mBtn = document.getElementById('menuBtn');
             const nMenu = document.getElementById('navMenu');
@@ -176,14 +233,16 @@
         };
 
         const urlParams = new URLSearchParams(window.location.search);
-        const tab = urlParams.get('tab');
-        
-        if (tab === 'plugins') {
-            loadPage('plugins', document.querySelector('a[onclick*="plugins"]'));
-        } else if (tab === 'mods') {
-            loadPage('mods', document.querySelector('a[onclick*="mods"]'));
+        let currentTab = urlParams.get('tab') || 'plugins';
+
+        if (pages[currentTab]) {
+            const tabBtn = document.getElementById('tab-' + currentTab);
+            if (tabBtn) tabBtn.classList.add('active');
+            contentArea.innerHTML = pages[currentTab];
         } else {
-            if (pages['home']) { contentArea.innerHTML = pages['home']; }
+            const defaultBtn = document.getElementById('tab-plugins');
+            if (defaultBtn) defaultBtn.classList.add('active');
+            contentArea.innerHTML = pages['plugins'];
         }
     });
 </script>
