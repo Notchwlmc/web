@@ -10,7 +10,7 @@
     <style>
         @font-face {
             font-family: 'Minecraft AE';
-            src: url('MinecraftAE-Bold.ttf') format('truetype');
+            src: url('./MinecraftAE-Bold.ttf') format('truetype');
             font-weight: 100 900;
             font-style: normal;
             font-display: swap;
@@ -659,12 +659,12 @@
     }
 
     const materials = [
-        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_1.png') }),
-        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_3.png') }),
-        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_4.png') }),
-        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_5.png') }),
-        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_0.png') }),
-        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_2.png') })
+        new THREE.MeshBasicMaterial({ map: loadPanorama('./panorama_1.png') }),
+        new THREE.MeshBasicMaterial({ map: loadPanorama('./panorama_3.png') }),
+        new THREE.MeshBasicMaterial({ map: loadPanorama('./panorama_4.png') }),
+        new THREE.MeshBasicMaterial({ map: loadPanorama('./panorama_5.png') }),
+        new THREE.MeshBasicMaterial({ map: loadPanorama('./panorama_0.png') }),
+        new THREE.MeshBasicMaterial({ map: loadPanorama('./panorama_2.png') })
     ];
 
     scene.background = new THREE.Color(0x0a0a0f);
@@ -816,6 +816,6 @@
         }, 2000);
     });
 </script>
-<script src="script.js"></script>
+<script src="./script.js"></script>
 </body>
 </html>
