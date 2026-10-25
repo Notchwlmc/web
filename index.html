@@ -40,13 +40,8 @@
         }
 
         #canvas-container {
-            position: fixed; inset: 0; z-index: 1;
-            transition: filter 0.3s ease;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            will-change: filter;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1;
         }
 
         .vignette {
@@ -64,10 +59,6 @@
             -webkit-backdrop-filter: blur(24px);
             border-bottom: none;
             transition: background 0.4s ease;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
         }
         .navbar.scrolled { background: rgba(10, 10, 15, 0.85); }
 
@@ -244,12 +235,20 @@
             min-height: 100vh;
             min-height: 100dvh;
             padding: 120px 40px 60px;
-            background: rgba(10, 10, 15, 0.65);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            /* 基础默认使用不透明背景，移动端通过此设置阻断频闪 */
+            background: rgba(10, 10, 15, 0.96);
             display: flex;
             flex-direction: column;
             align-items: center;
+        }
+
+        /* 仅在桌面端开启毛玻璃效果 */
+        @media (min-width: 769px) {
+            .content-section {
+                background: rgba(10, 10, 15, 0.65);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+            }
         }
 
         .glass-card {
@@ -485,9 +484,6 @@
             .hero h1 { font-size: clamp(2.5rem, 10vw, 3.5rem); letter-spacing: 2px; }
             .content-section {
                 padding: calc(100px + env(safe-area-inset-top)) 20px 40px;
-                background: rgba(10, 10, 15, 0.6);
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
             }
             .glass-card { padding: 30px; }
         }
@@ -643,22 +639,12 @@
 
     renderer.domElement.addEventListener('webglcontextlost', (e) => {
         e.preventDefault();
-        console.warn('[iOS] WebGL 上下文丢失，等待恢复…');
-    }, false);
-
-    renderer.domElement.addEventListener('webglcontextrestored', () => {
-        console.log('[iOS] WebGL 上下文已恢复');
     }, false);
 
     const textureLoader = new THREE.TextureLoader();
 
     function loadPanorama(url) {
-        const tex = textureLoader.load(
-            url,
-            undefined,
-            undefined,
-            (err) => console.warn('[iOS] 全景图加载失败:', url, err)
-        );
+        const tex = textureLoader.load(url);
         tex.minFilter = THREE.LinearFilter;
         tex.magFilter = THREE.LinearFilter;
         tex.generateMipmaps = false;
