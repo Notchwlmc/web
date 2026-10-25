@@ -1,7 +1,5 @@
 function init3D() {
-    if (typeof THREE === 'undefined') {
-        return;
-    }
+    if (typeof THREE === 'undefined') return;
     
     const container = document.getElementById('canvas-container');
     if (!container) return;
@@ -22,13 +20,16 @@ function init3D() {
 
     const materials = [];
     
+    // ==========================================
+    // 如果你的仓库名/路径不一样，请修改下面 6 行
+    // ==========================================
     const panoramaFiles = [
-        'https://i.ibb.co/sdTCSv0z/panorama-1.png',
-        'https://i.ibb.co/pBHZp74F/panorama-3.png',
-        'https://i.ibb.co/3y7YWMyb/panorama-4.png',
-        'https://i.ibb.co/j9LN2K7R/panorama-5.png',
-        'https://i.ibb.co/KjyL1bxL/panorama-0.png',
-        'https://i.ibb.co/CpFhJ3Nr/panorama-2.png'
+        'https://cdn.jsdelivr.net/gh/Notchwlmc/web@main/panorama_1.png',
+        'https://cdn.jsdelivr.net/gh/Notchwlmc/web@main/panorama_3.png',
+        'https://cdn.jsdelivr.net/gh/Notchwlmc/web@main/panorama_4.png',
+        'https://cdn.jsdelivr.net/gh/Notchwlmc/web@main/panorama_5.png',
+        'https://cdn.jsdelivr.net/gh/Notchwlmc/web@main/panorama_0.png',
+        'https://cdn.jsdelivr.net/gh/Notchwlmc/web@main/panorama_2.png'
     ];
 
     panoramaFiles.forEach(file => {
