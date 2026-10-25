@@ -66,9 +66,8 @@
         <div id="navMenu" class="nav-menu">
             <ul>
                 <li><a href="index.html">首页概览</a></li>
-                <li><a href="mcplugins.html">资源中心</a></li>
-                <li><a href="#">反馈</a></li>
-                <li><a href="#">关于我们</a></li>
+                <li><a href="javascript:void(0)" onclick="loadPage('plugins', this)">插件中心</a></li>
+                <li><a href="javascript:void(0)" onclick="loadPage('mods', this)">模组中心</a></li>
             </ul>
         </div>
     </div>
@@ -153,10 +152,6 @@
             `
         };
 
-        if (contentArea && pages['home']) {
-            contentArea.innerHTML = pages['home'];
-        }
-
         window.loadPage = function(pageName, element) {
             if (!contentArea) return;
             
@@ -179,6 +174,17 @@
             if (mBtn) mBtn.classList.remove('active');
             if (nMenu) nMenu.classList.remove('show');
         };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get('tab');
+        
+        if (tab === 'plugins') {
+            loadPage('plugins', document.querySelector('a[onclick*="plugins"]'));
+        } else if (tab === 'mods') {
+            loadPage('mods', document.querySelector('a[onclick*="mods"]'));
+        } else {
+            if (pages['home']) { contentArea.innerHTML = pages['home']; }
+        }
     });
 </script>
 </body>
