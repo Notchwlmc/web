@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>欢迎回来 - 赣一神人会</title>
     <style>
         @font-face {
@@ -10,24 +13,40 @@
             src: url('Minecraft AE.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
+            font-display: swap;
         }
 
         * {
             margin: 0; padding: 0; box-sizing: border-box;
             font-family: 'Minecraft AE', -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
             -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        html { scroll-behavior: smooth; }
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+            overscroll-behavior: none;
+        }
+
         body {
             background-color: #000; color: #fff;
             overflow-x: hidden;
             min-height: 200vh;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
+            overscroll-behavior-y: contain;
         }
 
         #canvas-container {
             position: fixed; inset: 0; z-index: 1;
             transition: filter 0.3s ease;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            will-change: filter;
         }
 
         .vignette {
@@ -45,6 +64,10 @@
             -webkit-backdrop-filter: blur(24px);
             border-bottom: none;
             transition: background 0.4s ease;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
         .navbar.scrolled { background: rgba(10, 10, 15, 0.85); }
 
@@ -61,12 +84,12 @@
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50%; cursor: pointer;
             backdrop-filter: blur(5px); transition: all 0.3s ease;
         }
-        .menu-btn:hover { background: rgba(0, 0, 0, 0.5); border-color: rgba(255, 255, 255, 0.25); }
 
         .menu-btn span {
             position: absolute; left: 50%; top: 50%; width: 18px; height: 2px;
             background-color: #25e6c5; border-radius: 2px; margin-left: -9px; margin-top: -1px;
             transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            display: block;
         }
         .menu-btn span:nth-child(1) { transform: translateY(-6px); }
         .menu-btn span:nth-child(2) { transform: translateY(0); }
@@ -76,13 +99,10 @@
         .menu-btn.active span:nth-child(3) { transform: rotate(-45deg) translateY(0); }
 
         .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; }
-        .logo-text-group { display: flex; flex-direction: column; justify-content: center; }
-        .logo-text-cn { font-size: 1.3rem; font-weight: 700; line-height: 1.2; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        .logo-text-en { font-size: 0.65rem; color: #ddd; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 2px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-        .logo-text-group{
+        .logo-text-group {
             display: flex;
             align-items: center;
-            gap:8px;
+            gap: 8px;
             min-width: 0;
             overflow: hidden;
         }
@@ -92,15 +112,24 @@
             justify-content: center;
             line-height: 1.1;
             white-space: nowrap;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
-        .logo-text-en{
+        .logo-text-en {
             display: flex;
             flex-direction: column;
             justify-content: center;
             line-height: 1.1;
             white-space: nowrap;
+            font-size: 0.65rem;
+            color: #ddd;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-top: 2px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
-            .logo-dot { width: 10px; height: 10px; background: #25e6c5; border-radius: 50%; box-shadow: 0 0 10px #25e6c5; animation: pulse 2s infinite; }
+        .logo-dot { width: 10px; height: 10px; background: #25e6c5; border-radius: 50%; box-shadow: 0 0 10px #25e6c5; animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(37, 230, 197, 0.7); } 50% { box-shadow: 0 0 0 10px rgba(37, 230, 197, 0); } }
 
         .nav-menu {
@@ -114,6 +143,7 @@
             padding: 10px;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
+            isolation: isolate;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
             opacity: 0;
             visibility: hidden;
@@ -121,13 +151,12 @@
             transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-            .nav-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        .nav-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
         .nav-menu ul { list-style: none; }
         .nav-menu li a {
             display: block; padding: 12px 16px; text-decoration: none; color: rgba(255, 255, 255, 0.8);
             font-size: 0.95rem; border-radius: 8px; transition: background 0.2s, color 0.2s;
         }
-        .nav-menu li a:hover { background: rgba(255, 255, 255, 0.1); color: #25e6c5; }
 
         .nav-controls { display: flex; align-items: center; gap: 16px; position: relative; min-width: 0; }
 
@@ -136,13 +165,13 @@
             background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 50%; color: #25e6c5; cursor: pointer; backdrop-filter: blur(5px); transition: all 0.3s ease;
         }
-        .gear-btn:hover { background: rgba(0, 0, 0, 0.5); border-color: rgba(255, 255, 255, 0.25); transform: rotate(90deg); }
-        .gear-btn svg { width: 20px; height: 20px; fill: currentColor; }
+        .gear-btn svg { width: 20px; height: 20px; fill: currentColor; display: block; flex-shrink: 0; max-width: 100%; }
 
         .settings-panel {
             position: absolute; top: 55px; right: 0; width: 240px;
             background: rgba(15, 15, 20, 0.85); border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px; padding: 20px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            isolation: isolate;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7); opacity: 0; visibility: hidden; transform: translateY(-10px);
             transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
@@ -152,14 +181,21 @@
         .setting-item:last-child { margin-bottom: 0; }
         .setting-header { display: flex; justify-content: space-between; font-size: 0.8rem; color: #ccc; }
 
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; }
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 28px;
+            background: transparent;
+            cursor: pointer;
+            margin: 0;
+        }
         input[type=range]:focus { outline: none; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.15); border-radius: 2px; }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%;
-            background: #25e6c5; margin-top: -5px; box-shadow: 0 0 8px rgba(37, 230, 197, 0.8); transition: transform 0.1s;
+            -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+            background: #25e6c5; margin-top: -7px; box-shadow: 0 0 8px rgba(37, 230, 197, 0.8); transition: transform 0.1s;
         }
-        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
         .status-badge {
             display: flex; align-items: center; gap: 8px; padding: 8px 16px;
@@ -167,12 +203,6 @@
             border-radius: 20px; font-size: 0.85rem; color: #eee; backdrop-filter: blur(5px);
             cursor: pointer; user-select: none; transition: background-color 0.3s ease, border-color 0.3s ease;
             min-width: 0; flex-shrink: 1;
-        }
-        .status-badge:hover {
-            color: #fff;
-            background: rgba(37, 230, 197, 0.15);
-            border-color: rgba(37, 230, 197, 0.5);
-            box-shadow: 0 5px 15px rgba(37, 230, 197, 0.3);
         }
         .status-badge .dot { width: 6px; height: 6px; background: #25e6c5; border-radius: 50%; transition: background 0.3s; }
         .status-badge #ipText { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
@@ -186,7 +216,9 @@
         .status-badge.animate { animation: bounceClick 0.4s cubic-bezier(0.28, 0.84, 0.42, 1) forwards; }
 
         .hero {
-            position: relative; z-index: 10; height: 100vh;
+            position: relative; z-index: 10;
+            height: 100vh;
+            height: 100dvh;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center; pointer-events: none;
         }
@@ -203,9 +235,11 @@
             position: relative;
             z-index: 10;
             min-height: 100vh;
+            min-height: 100dvh;
             padding: 120px 40px 60px;
             background: rgba(10, 10, 15, 0.85);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -247,15 +281,7 @@
             margin: 40px auto;
         }
 
-        .feature-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-
+        .feature-card,
         .special-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -263,18 +289,6 @@
             padding: 30px;
             text-align: center;
             transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-
-        .special-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-5px);
-        }
-
-        .feature-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-5px);
         }
 
         .feature-icon {
@@ -301,10 +315,6 @@
             color: transparent;
             animation: text-rainbow 3s linear infinite;
         }
-        @keyframes text-rainbow {
-            0% { background-position: 0% center; }
-            100% { background-position: 200% center; }
-        }
 
         .feature-card p {
             font-size: 0.9rem;
@@ -324,12 +334,13 @@
             color: transparent;
             animation: text-rainbow 3s linear infinite;
         }
+
         @keyframes text-rainbow {
             0% { background-position: 0% center; }
             100% { background-position: 200% center; }
         }
 
-        .card-link{
+        .card-link {
             display: block;
             width: 100%;
             text-decoration: none;
@@ -338,54 +349,24 @@
             height: 100%;
         }
 
-        .card-link:hover{
-            border-color: rgba(37, 230, 197, 0.5) ;
-            transform: translateY(-5px);
-            transition: all 0.3s ease;
-        }
-
         .footer {
-            margin-top: 800px;
+            margin-top: 60px;
             display: flex;
             align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
             gap: 16px;
+            padding-bottom: calc(30px + env(safe-area-inset-bottom));
         }
 
-        .footer         p{
+        .footer p {
             font-size: 0.9rem;
             color: #666;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
 
-
-        .github-link {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #888;
-            text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-
-        .github-link:hover {
-            color: #fff;
-            background: rgba(37, 230, 197, 0.15);
-            border-color: rgba(37, 230, 197, 0.5);
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(37, 230, 197, 0.3);
-        }
-
-        .github-link svg {
-            width: 24px;
-            height: 24px;
-            fill: currentColor;
-        }
+        .github-link,
         .qq-link {
             display: flex;
             justify-content: center;
@@ -400,63 +381,106 @@
             transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        .qq-link:hover {
-            color: #fff;
-            background: rgba(37, 230, 197, 0.15);
-            border-color: rgba(37, 230, 197, 0.5);
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(37, 230, 197, 0.3);
+        .github-link svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+            display: block;
+            flex-shrink: 0;
+            max-width: 100%;
         }
 
         .qq-link svg {
-            width: 24px;
-            height: 24px;
-            fill:rgba(255, 255, 255, 0.5) ;
+            width: 24px !important;
+            height: 24px !important;
+            fill: rgba(255, 255, 255, 0.5);
+            display: block;
+            flex-shrink: 0;
+            max-width: 100%;
         }
+
+        .navbar, .status-badge, button, a, input {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        button {
+            -webkit-appearance: none;
+            appearance: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .menu-btn, .gear-btn { -webkit-appearance: none; appearance: none; }
+
+        .menu-btn, .gear-btn, .github-link, .qq-link { flex-shrink: 0; }
+
+        html::-webkit-scrollbar, body::-webkit-scrollbar {
+            width: 0 !important; height: 0 !important; background: transparent !important; display: none;
+        }
+        html, body { scrollbar-width: none; -ms-overflow-style: none; }
+
+        @media (hover: hover) and (pointer: fine) {
+            .menu-btn:hover { background: rgba(0, 0, 0, 0.5); border-color: rgba(255, 255, 255, 0.25); }
+            .gear-btn:hover { background: rgba(0, 0, 0, 0.5); border-color: rgba(255, 255, 255, 0.25); transform: rotate(90deg); }
+            .nav-menu li a:hover { background: rgba(255, 255, 255, 0.1); color: #25e6c5; }
+            .status-badge:hover {
+                color: #fff;
+                background: rgba(37, 230, 197, 0.15);
+                border-color: rgba(37, 230, 197, 0.5);
+                box-shadow: 0 5px 15px rgba(37, 230, 197, 0.3);
+            }
+            .feature-card:hover,
+            .special-card:hover {
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(255, 255, 255, 0.2);
+                transform: translateY(-5px);
+            }
+            .card-link:hover {
+                border-color: rgba(37, 230, 197, 0.5);
+                transform: translateY(-5px);
+                transition: all 0.3s ease;
+            }
+            .github-link:hover,
+            .qq-link:hover {
+                color: #fff;
+                background: rgba(37, 230, 197, 0.15);
+                border-color: rgba(37, 230, 197, 0.5);
+                transform: translateY(-5px);
+                box-shadow: 0 5px 15px rgba(37, 230, 197, 0.3);
+            }
+        }
+
         @media (max-width: 768px) {
-            .navbar { padding: 0 16px; }
+            .navbar {
+                padding: 0 16px;
+                padding-top: env(safe-area-inset-top);
+                height: auto;
+                min-height: 64px;
+            }
             .nav-left { gap: 10px; min-width: 0; }
             .nav-controls { gap: 10px; min-width: 0; }
             .logo-text-cn { font-size: 1.05rem; }
             .logo-text-en { font-size: 0.55rem; }
             .status-badge { max-width: 46vw; padding: 8px 12px; font-size: 0.75rem; min-width: 0; }
-            .status-badge #ipText { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-            .hero h1 { font-size: 3.5rem; letter-spacing: 2px;}
-            .content-section { padding: 100px 20px 40px; }
+            .hero h1 { font-size: clamp(2.5rem, 10vw, 3.5rem); letter-spacing: 2px; }
+            .content-section {
+                padding: calc(100px + env(safe-area-inset-top)) 20px 40px;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: rgba(10, 10, 15, 0.92);
+            }
             .glass-card { padding: 30px; }
         }
 
-
-    
-        /* ================= iOS 兼容性修复 ================= */
-        /* 3.1 移除 iOS Safari 点击时的灰色高亮遮罩 */
-        * { -webkit-tap-highlight-color: transparent; }
-
-        /* 3.2 重置 iOS 默认按钮外观：修复左上角菜单/齿轮按钮被 Safari 原生椭圆按钮样式圈住、线条变形 */
-        button { -webkit-appearance: none; appearance: none; -webkit-user-select: none; user-select: none; }
-        .menu-btn, .gear-btn { -webkit-appearance: none; appearance: none; }
-
-        /* 3.3 按钮与圆形图标在 iOS flex 中禁止被压缩塌陷，保持正圆 */
-        .menu-btn, .gear-btn, .github-link, .qq-link { flex-shrink: 0; }
-
-        /* 3.4 隐藏 iOS 滚动条：消除右下角图标旁那条灰色竖线"尾巴" */
-        html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0 !important; height: 0 !important; background: transparent !important; display: none; }
-        html, body { scrollbar-width: none; -ms-overflow-style: none; }
-
-        /* 3.5 底部安全区适配：图标避开 iPhone 底部 Home Indicator 黑条，不再贴地被遮挡 */
-        .footer { padding-bottom: calc(30px + env(safe-area-inset-bottom)); }
-
-        /* 3.6 图标 SVG 规范显示：display:block 去除行内基线间隙, flex 内不被拉伸变形 */
-        .menu-btn span { display: block; }
-        .gear-btn svg, .github-link svg, .qq-link svg { display: block; flex-shrink: 0; max-width: 100%; }
-        /* QQ 图标 SVG 内联了 256x256 属性，这里强制用 CSS 锁死尺寸，防止撑出图标框 */
-        .qq-link svg { width: 24px !important; height: 24px !important; }
-
-        /* 3.7 移动端导航栏在安全区顶部留白，避免状态栏遮挡 (配合 viewport-fit=cover) */
-        @media (max-width: 768px) {
-            .navbar { padding-top: env(safe-area-inset-top); height: auto; min-height: 64px; }
+        @media (max-width: 480px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .glass-card { padding: 24px 20px; }
+            .glass-card h2 { font-size: 1.8rem; }
         }
-        /* ============== iOS 兼容性修复 结束 ============== */
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -483,7 +507,7 @@
 
         <div id="navMenu" class="nav-menu">
             <ul>
-                <li><a href="#" >首页</a></li>
+                <li><a href="#">首页</a></li>
                 <li><a href="#" id="link-resource">资源</a></li>
                 <li><a href="#">反馈</a></li>
                 <li><a href="#" id="mcplugin">文档</a></li>
@@ -534,52 +558,45 @@
     <div class="glass-card">
         <h2>服务器简介</h2>
         <p>欢迎想变成神人的人加入！此服务器为原版生存服务器，你可以在这里尽情给腐竹打工。</p>
-        <p>
-           享受当黑奴的快乐!
-        </p>
+        <p>享受当黑奴的快乐!</p>
     </div>
 
     <div class="features-grid">
-        <!-- 玩法 1 -->
         <div class="feature-card">
             <div class="feature-icon">️</div>
             <h3>硬核生存</h3>
             <p>内有自研Resdence和PubliicTP,为你的生存之旅保驾护航。</p>
         </div>
-        <!-- 玩法 2 -->
         <div class="feature-card">
             <div class="feature-icon">️</div>
             <h3>粘液科技</h3>
             <p>高度自由的自动化流水线，从基础挖矿到全自动农场，体验工业时代的魅力。</p>
         </div>
-        <!-- 玩法 3 -->
         <div class="feature-card">
             <div class="feature-icon"></div>
             <h3>自由社交</h3>
             <p>结交志同道合的伙伴，绑定你们的专属关系</p>
         </div>
-        <!-- 玩法 4 -->
-        <a href="https://ciallo.cc/" class="card-link"target="_blank" >
-        <div class="special-card">
-            <div class="feature-icon"></div>
-            <h3>腐竹是香香软软的小南梁</h3>
-            <p>腐竹正在Ciallo～ (∠・ω< )⌒★</p>
-        </div>
+        <a href="https://ciallo.cc/" class="card-link" target="_blank">
+            <div class="special-card">
+                <div class="feature-icon"></div>
+                <h3>腐竹是香香软软的小南梁</h3>
+                <p>腐竹正在Ciallo～ (∠・ω< )⌒★</p>
+            </div>
         </a>
     </div>
 
-
     <footer class="footer">
         <p>&copy; 2025  Created by Notchwlmcs. All rights reserved.</p>
-        <a href="https://github.com/Notchwlmc" target="_blank" class="github-link" title="访问我的 GitHub" >
+        <a href="https://github.com/Notchwlmc" target="_blank" class="github-link" title="访问我的 GitHub">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
             </svg>
         </a>
-            <a href="https://qun.qq.com/universal-share/share?ac=1&authKey=GqJmZonrmk5PX9kR9p5mI9U3MdLtufAn2ZgMymV7%2BfrYG43qVrrU9C1dMWv4VrC0&busi_data=eyJncm91cENvZGUiOiIyOTUyODY5OTMiLCJ0b2tlbiI6InUxMnJmOG9ENmpjbmZRS3B2cjErUFlQSGtLMnBaeXFnRHZvMGp5ZG42Zk5Wd08yS1paM2dXcFU5RzUwMmdTdXAiLCJ1aW4iOiIxNjM3Njk1OTEzIn0%3D&data=rhihtQaBPgmXln2qOwsb6ZXoPXWSrzypKOCHca0gxOhEUGvsv_LQC6P_xoLY8gILMQUR0Xh8A58nqjQm4TWMFg&svctype=4&tempid=h5_group_info" target="_blank" class="qq-link" title="加入我们,295286993" >
-                <svg t="1792808590054" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1846" data-darkreader-inline-fill="" width="256" height="256"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64z m210.5 612.4c-11.5 1.4-44.9-52.7-44.9-52.7 0 31.3-16.2 72.2-51.1 101.8 16.9 5.2 54.9 19.2 45.9 34.4-7.3 12.3-125.6 7.9-159.8 4-34.2 3.8-152.5 8.3-159.8-4-9.1-15.2 28.9-29.2 45.8-34.4-35-29.5-51.1-70.4-51.1-101.8 0 0-33.4 54.1-44.9 52.7-5.4-0.7-12.4-29.6 9.4-99.7 10.3-33 22-60.5 40.2-105.8-3.1-116.9 45.3-215 160.4-215 113.9 0 163.3 96.1 160.4 215 18.1 45.2 29.9 72.8 40.2 105.8 21.7 70.1 14.6 99.1 9.3 99.7z" p-id="1847"></path>
-                </svg>
-            </a>
+        <a href="https://qun.qq.com/universal-share/share?ac=1&authKey=GqJmZonrmk5PX9kR9p5mI9U3MdLtufAn2ZgMymV7%2BfrYG43qVrrU9C1dMWv4VrC0&busi_data=eyJncm91cENvZGUiOiIyOTUyODY5OTMiLCJ0b2tlbiI6InUxMnJmOG9ENmpjbmZRS3B2cjErUFlQSGtLMnBaeXFnRHZvMGp5ZG42Zk5Wd08yS1paM2dXcFU5RzUwMmdTdXAiLCJ1aW4iOiIxNjM3Njk1OTEzIn0%3D&data=rhihtQaBPgmXln2qOwsb6ZXoPXWSrzypKOCHca0gxOhEUGvsv_LQC6P_xoLY8gILMQUR0Xh8A58nqjQm4TWMFg&svctype=4&tempid=h5_group_info" target="_blank" class="qq-link" title="加入我们,295286993">
+            <svg t="1792808590054" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1846" width="256" height="256"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64z m210.5 612.4c-11.5 1.4-44.9-52.7-44.9-52.7 0 31.3-16.2 72.2-51.1 101.8 16.9 5.2 54.9 19.2 45.9 34.4-7.3 12.3-125.6 7.9-159.8 4-34.2 3.8-152.5 8.3-159.8-4-9.1-15.2 28.9-29.2 45.8-34.4-35-29.5-51.1-70.4-51.1-101.8 0 0-33.4 54.1-44.9 52.7-5.4-0.7-12.4-29.6 9.4-99.7 10.3-33 22-60.5 40.2-105.8-3.1-116.9 45.3-215 160.4-215 113.9 0 163.3 96.1 160.4 215 18.1 45.2 29.9 72.8 40.2 105.8 21.7 70.1 14.6 99.1 9.3 99.7z" p-id="1847"></path>
+            </svg>
+        </a>
     </footer>
 </div>
 
@@ -593,36 +610,45 @@
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
-    /* ===== 资源路径修复 =====
-     * 自动取当前页面所在目录，兼容：
-     *   https://user.github.io/web/        → /web/
-     *   https://user.github.io/web/index.html → /web/
-     *   file:///.../web/index.html          → .../web/
-     */
-    const ASSET_BASE = (() => {
-        const p = window.location.pathname;
-        return p.endsWith('/') ? p : p.replace(/[^/]+$/, '');
-    })();
+    renderer.domElement.addEventListener('webglcontextlost', (e) => {
+        e.preventDefault();
+        console.warn('[iOS] WebGL 上下文丢失，等待恢复…');
+    }, false);
+
+    renderer.domElement.addEventListener('webglcontextrestored', () => {
+        console.log('[iOS] WebGL 上下文已恢复');
+    }, false);
 
     const textureLoader = new THREE.TextureLoader();
-    const tex = (file) => textureLoader.load(
-        ASSET_BASE + file,
-        (t) => { /* 加载成功 */ },
-        undefined,
-        () => console.error('[纹理加载失败]', ASSET_BASE + file)
-    );
+
+    function loadPanorama(url) {
+        const tex = textureLoader.load(
+            url,
+            undefined,
+            undefined,
+            (err) => console.warn('[iOS] 全景图加载失败:', url, err)
+        );
+        tex.minFilter = THREE.LinearFilter;
+        tex.magFilter = THREE.LinearFilter;
+        tex.generateMipmaps = false;
+        tex.wrapS = THREE.ClampToEdgeWrapping;
+        tex.wrapT = THREE.ClampToEdgeWrapping;
+        return tex;
+    }
 
     const materials = [
-        new THREE.MeshBasicMaterial({ map: tex('panorama_1.png') }),
-        new THREE.MeshBasicMaterial({ map: tex('panorama_3.png') }),
-        new THREE.MeshBasicMaterial({ map: tex('panorama_4.png') }),
-        new THREE.MeshBasicMaterial({ map: tex('panorama_5.png') }),
-        new THREE.MeshBasicMaterial({ map: tex('panorama_0.png') }),
-        new THREE.MeshBasicMaterial({ map: tex('panorama_2.png') })
+        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_1.png') }),
+        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_3.png') }),
+        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_4.png') }),
+        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_5.png') }),
+        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_0.png') }),
+        new THREE.MeshBasicMaterial({ map: loadPanorama('panorama_2.png') })
     ];
+
+    scene.background = new THREE.Color(0x0a0a0f);
 
     const geometry = new THREE.BoxGeometry(100, 100, 100);
     materials.forEach(mat => { mat.side = THREE.BackSide; });
@@ -640,11 +666,28 @@
     }
     animate();
 
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
+    let resizeRaf = null;
+
+    function updateSize() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        camera.aspect = w / h;
         camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+        renderer.setSize(w, h);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    }
+
+    function scheduleResize() {
+        if (resizeRaf) cancelAnimationFrame(resizeRaf);
+        resizeRaf = requestAnimationFrame(updateSize);
+    }
+
+    window.addEventListener('resize', scheduleResize);
+    window.addEventListener('orientationchange', scheduleResize);
+
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', scheduleResize);
+    }
 
     const navbar = document.getElementById('navbar');
     const menuBtn = document.getElementById('menuBtn');
@@ -689,10 +732,14 @@
 
     const blurSlider = document.getElementById('blurSlider');
     const blurVal = document.getElementById('blurVal');
+    let blurRaf = null;
     blurSlider.addEventListener('input', (e) => {
         const val = e.target.value;
-        container.style.filter = `blur(${val}px)`;
         blurVal.textContent = `${val}px`;
+        if (blurRaf) cancelAnimationFrame(blurRaf);
+        blurRaf = requestAnimationFrame(() => {
+            container.style.filter = val === '0' ? 'none' : `blur(${val}px)`;
+        });
     });
 
     const speedSlider = document.getElementById('speedSlider');
@@ -707,34 +754,47 @@
     const ipText = document.getElementById('ipText');
     const ipAddress = 'mc.notchwlmc.us.ci';
 
+    async function copyText(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch (_) {}
+        }
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.cssText =
+            'position:fixed;top:0;left:0;width:1px;height:1px;' +
+            'padding:0;border:none;outline:none;box-shadow:none;' +
+            'background:transparent;opacity:0;font-size:16px;';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        ta.setSelectionRange(0, text.length);
+        let ok = false;
+        try { ok = document.execCommand('copy'); } catch (_) { ok = false; }
+        document.body.removeChild(ta);
+        return ok;
+    }
+
     ipBadge.addEventListener('click', async () => {
         ipBadge.classList.remove('animate');
         void ipBadge.offsetWidth;
         ipBadge.classList.add('animate');
 
-        try {
-            await navigator.clipboard.writeText(ipAddress);
-            ipText.textContent = '已复制!';
-            ipBadge.classList.add('copied');
-            setTimeout(() => {
-                ipText.textContent = `IP:${ipAddress}`;
-                ipBadge.classList.remove('copied');
-            }, 2000);
-        } catch (err) {
-            const textarea = document.createElement('textarea');
-            textarea.value = ipAddress;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-
-            ipText.textContent = '已复制!';
-            ipBadge.classList.add('copied');
-            setTimeout(() => {
-                ipText.textContent = `IP:${ipAddress}`;
-                ipBadge.classList.remove('copied');
-            }, 2000);
+        const ok = await copyText(ipAddress);
+        if (!ok) {
+            ipText.textContent = '复制失败';
+            setTimeout(() => { ipText.textContent = `IP:${ipAddress}`; }, 2000);
+            return;
         }
+        ipText.textContent = '已复制!';
+        ipBadge.classList.add('copied');
+        setTimeout(() => {
+            ipText.textContent = `IP:${ipAddress}`;
+            ipBadge.classList.remove('copied');
+        }, 2000);
     });
 </script>
 <script src="script.js"></script>
