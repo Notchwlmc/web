@@ -116,66 +116,70 @@
 
 <script src="common.js"></script>
 <script>
-    initUI();
-
-    const pages = {
-        'home': `
-            <h2 style="margin-bottom: 10px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">欢迎来到资源中心</h2>
-            <p style="color: #aaa; line-height: 1.6;">这里是最新更新的服务器资源统计。</p>
-            <div class="home-stats">
-                <div class="stat-card"><h3>2</h3><p>收录插件总数</p></div>
-                <div class="stat-card"><h3>0</h3><p>累计下载量</p></div>
-            </div>
-        `,
-        'plugins': `
-            <a href="plugins-detail.html" style="text-decoration: none; color: inherit; display: block;">
+    document.addEventListener('DOMContentLoaded', () => {
+        const contentArea = document.getElementById('content-area');
+        
+        const pages = {
+            'home': `
+                <h2 style="margin-bottom: 10px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">欢迎来到资源中心</h2>
+                <p style="color: #aaa; line-height: 1.6;">这里是最新更新的服务器资源统计。</p>
+                <div class="home-stats">
+                    <div class="stat-card"><h3>2</h3><p>收录插件总数</p></div>
+                    <div class="stat-card"><h3>0</h3><p>累计下载量</p></div>
+                </div>
+            `,
+            'plugins': `
+                <a href="plugins-detail.html" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="plugin-card">
+                        <div class="card-icon"><img src="./PublicTP.png" alt=""></div>
+                        <div class="card-info">
+                            <h3>PublicTP</h3>
+                            <p>A plugin can record locations and share to everyone.</p>
+                            <div class="tags"><span>Bukkit</span><span>Spigot</span><span>1.21.x</span></div>
+                        </div>
+                    </div>
+                </a>
                 <div class="plugin-card">
-                    <div class="card-icon"><img src="./PublicTP.png" alt=""></div>
+                    <div class="card-icon"><img src="./Ramchecker.png" alt=""></div>
                     <div class="card-info">
-                        <h3>PublicTP</h3>
-                        <p>A plugin can record locations and share to everyone.</p>
-                        <div class="tags"><span>Bukkit</span><span>Spigot</span><span>1.21.x</span></div>
+                        <h3>Ramchecker</h3>
+                        <p>Can monitor server memory usage, and restart the server when it exceeds the threshold</p>
+                        <div class="tags"><span>Paper</span><span>1.21.x</span></div>
                     </div>
                 </div>
-            </a>
-            <div class="plugin-card">
-                <div class="card-icon"><img src="./Ramchecker.png" alt=""></div>
-                <div class="card-info">
-                    <h3>Ramchecker</h3>
-                    <p>Can monitor server memory usage, and restart the server when it exceeds the threshold</p>
-                    <div class="tags"><span>Paper</span><span>1.21.x</span></div>
-                </div>
-            </div>
-        `,
-        'mods': `
-            <div class="loading"><i class="material-icons spin-icon" style="font-size: 40px;">autorenew</i><span>模组正在开发中...</span></div>
-        `
-    };
+            `,
+            'mods': `
+                <div class="loading"><i class="material-icons spin-icon" style="font-size: 40px;">autorenew</i><span>模组正在开发中...</span></div>
+            `
+        };
 
-    window.loadPage = function(pageName, element) {
-        const contentDiv = document.getElementById('content-area');
-        contentDiv.innerHTML = `<div class="loading"><i class="material-icons spin-icon" style="font-size: 40px;">autorenew</i><span>正在加载数据...</span></div>`;
+        if (contentArea && pages['home']) {
+            contentArea.innerHTML = pages['home'];
+        }
 
-        setTimeout(() => {
-            if(pages[pageName]) {
-                contentDiv.innerHTML = pages[pageName];
-                contentDiv.style.animation = 'none'; contentDiv.offsetHeight; contentDiv.style.animation = 'fadeIn 0.4s ease-out';
-            } else {
-                contentDiv.innerHTML = '<h2 style="color: #ff5555;">404 页面未找到</h2>';
-            }
-        }, 300);
+        window.loadPage = function(pageName, element) {
+            if (!contentArea) return;
+            
+            contentArea.innerHTML = `<div class="loading"><i class="material-icons spin-icon" style="font-size: 40px;">autorenew</i><span>正在加载数据...</span></div>`;
 
-        document.querySelectorAll('.nav-menu li a').forEach(item => item.classList.remove('active'));
-        if (element) { element.classList.add('active'); }
+            setTimeout(() => {
+                if(pages[pageName]) {
+                    contentArea.innerHTML = pages[pageName];
+                    contentArea.style.animation = 'none'; contentArea.offsetHeight; contentArea.style.animation = 'fadeIn 0.4s ease-out';
+                } else {
+                    contentArea.innerHTML = '<h2 style="color: #ff5555;">404 页面未找到</h2>';
+                }
+            }, 300);
 
-        document.getElementById('menuBtn').classList.remove('active');
-        document.getElementById('navMenu').classList.remove('show');
-    };
+            document.querySelectorAll('.nav-menu li a').forEach(item => item.classList.remove('active'));
+            if (element) { element.classList.add('active'); }
 
-    window.onload = function() {
-        const contentDiv = document.getElementById('content-area');
-        if(pages['home']) { contentDiv.innerHTML = pages['home']; }
-    };
+            const mBtn = document.getElementById('menuBtn');
+            const nMenu = document.getElementById('navMenu');
+            if (mBtn) mBtn.classList.remove('active');
+            if (nMenu) nMenu.classList.remove('show');
+        };
+    });
 </script>
 </body>
 </html>
