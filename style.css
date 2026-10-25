@@ -106,7 +106,7 @@ a { text-decoration: none; color: inherit; }
 .nav-menu li a:hover { background: rgba(255, 255, 255, 0.1); color: #25e6c5; }
 .nav-menu li a.active { color: #25e6c5; background: rgba(37, 230, 197, 0.1); }
 
-.nav-controls { display: flex; align-items: center; gap: 16px; position: relative; min-width: 0; }
+.nav-controls { display: flex; align-items: center; gap: 16px; position: relative; min-width: 0; flex-shrink: 0; }
 .settings-wrapper { position: relative; flex-shrink: 0; }
 
 .gear-btn {
