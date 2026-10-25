@@ -1,6 +1,5 @@
 function init3D() {
     if (typeof THREE === 'undefined') {
-        console.warn('Three.js 未加载，跳过 3D 渲染');
         return;
     }
     
@@ -19,20 +18,26 @@ function init3D() {
     renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); }, false);
 
     const textureLoader = new THREE.TextureLoader();
+    textureLoader.setCrossOrigin('anonymous');
+
     const materials = [];
+    
     const panoramaFiles = [
-        'panorama_1.png', 'panorama_3.png',
-        'panorama_4.png', 'panorama_5.png',
-        'panorama_0.png', 'panorama_2.png'
+        'https://i.ibb.co/sdTCSv0z/panorama-1.png',
+        'https://i.ibb.co/pBHZp74F/panorama-3.png',
+        'https://i.ibb.co/3y7YWMyb/panorama-4.png',
+        'https://i.ibb.co/j9LN2K7R/panorama-5.png',
+        'https://i.ibb.co/KjyL1bxL/panorama-0.png',
+        'https://i.ibb.co/CpFhJ3Nr/panorama-2.png'
     ];
 
     panoramaFiles.forEach(file => {
         const mat = new THREE.MeshBasicMaterial({ color: 0x0a0a0f, side: THREE.BackSide });
-        const tex = textureLoader.load('./' + file, () => {
+        const tex = textureLoader.load(file, () => {
             mat.map = tex;
             mat.color.setHex(0xffffff);
             mat.needsUpdate = true;
-        });
+        }, undefined, () => {});
         tex.minFilter = THREE.LinearFilter;
         tex.magFilter = THREE.LinearFilter;
         tex.generateMipmaps = false;
