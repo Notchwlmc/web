@@ -1,70 +1,78 @@
-const scene = new THREE.Scene();
-const container = document.getElementById('canvas-container');
+function init3D() {
+    if (typeof THREE === 'undefined') {
+        console.warn('Three.js 未加载，跳过 3D 渲染');
+        return;
+    }
+    
+    const container = document.getElementById('canvas-container');
+    if (!container) return;
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
-camera.position.set(0, 0, 0);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
+    camera.position.set(0, 0, 0);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-container.appendChild(renderer.domElement);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
 
-renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); }, false);
+    renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); }, false);
 
-const textureLoader = new THREE.TextureLoader();
-const materials = [];
-const panoramaFiles = [
-    'panorama_1.png', 'panorama_3.png',
-    'panorama_4.png', 'panorama_5.png',
-    'panorama_0.png', 'panorama_2.png'
-];
+    const textureLoader = new THREE.TextureLoader();
+    const materials = [];
+    const panoramaFiles = [
+        'panorama_1.png', 'panorama_3.png',
+        'panorama_4.png', 'panorama_5.png',
+        'panorama_0.png', 'panorama_2.png'
+    ];
 
-panoramaFiles.forEach(file => {
-    const mat = new THREE.MeshBasicMaterial({ color: 0x0a0a0f, side: THREE.BackSide });
-    const tex = textureLoader.load('./' + file, () => {
-        mat.map = tex;
-        mat.color.setHex(0xffffff);
-        mat.needsUpdate = true;
+    panoramaFiles.forEach(file => {
+        const mat = new THREE.MeshBasicMaterial({ color: 0x0a0a0f, side: THREE.BackSide });
+        const tex = textureLoader.load('./' + file, () => {
+            mat.map = tex;
+            mat.color.setHex(0xffffff);
+            mat.needsUpdate = true;
+        });
+        tex.minFilter = THREE.LinearFilter;
+        tex.magFilter = THREE.LinearFilter;
+        tex.generateMipmaps = false;
+        tex.wrapS = THREE.ClampToEdgeWrapping;
+        tex.wrapT = THREE.ClampToEdgeWrapping;
+        materials.push(mat);
     });
-    tex.minFilter = THREE.LinearFilter;
-    tex.magFilter = THREE.LinearFilter;
-    tex.generateMipmaps = false;
-    tex.wrapS = THREE.ClampToEdgeWrapping;
-    tex.wrapT = THREE.ClampToEdgeWrapping;
-    materials.push(mat);
-});
 
-scene.background = new THREE.Color(0x0a0a0f);
-const geometry = new THREE.BoxGeometry(2000, 2000, 2000);
-const skybox = new THREE.Mesh(geometry, materials);
-scene.add(skybox);
+    scene.background = new THREE.Color(0x0a0a0f);
+    const geometry = new THREE.BoxGeometry(2000, 2000, 2000);
+    const skybox = new THREE.Mesh(geometry, materials);
+    scene.add(skybox);
 
-let currentSpeedMultiplier = 1;
-let time = 0;
+    let currentSpeedMultiplier = 1;
+    let time = 0;
 
-function animate() {
-    requestAnimationFrame(animate);
-    time += 0.001 * currentSpeedMultiplier;
-    camera.rotation.x = -0.05 + Math.sin(time * 0.5) * 0.02;
-    camera.rotation.y = Math.sin(time * 0.3) * 0.05;
-    skybox.rotation.y -= 0.0002 * currentSpeedMultiplier;
-    renderer.render(scene, camera);
+    function animate() {
+        requestAnimationFrame(animate);
+        time += 0.001 * currentSpeedMultiplier;
+        camera.rotation.x = -0.05 + Math.sin(time * 0.5) * 0.02;
+        camera.rotation.y = Math.sin(time * 0.3) * 0.05;
+        skybox.rotation.y -= 0.0002 * currentSpeedMultiplier;
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    let resizeRaf = null;
+    function updateSize() {
+        const w = window.innerWidth; const h = window.innerHeight;
+        camera.aspect = w / h; camera.updateProjectionMatrix();
+        renderer.setSize(w, h); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    }
+    function scheduleResize() {
+        if (resizeRaf) cancelAnimationFrame(resizeRaf);
+        resizeRaf = requestAnimationFrame(updateSize);
+    }
+    window.addEventListener('resize', scheduleResize);
+    window.addEventListener('orientationchange', scheduleResize);
+    if (window.visualViewport) { window.visualViewport.addEventListener('resize', scheduleResize); }
 }
-animate();
-
-let resizeRaf = null;
-function updateSize() {
-    const w = window.innerWidth; const h = window.innerHeight;
-    camera.aspect = w / h; camera.updateProjectionMatrix();
-    renderer.setSize(w, h); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-}
-function scheduleResize() {
-    if (resizeRaf) cancelAnimationFrame(resizeRaf);
-    resizeRaf = requestAnimationFrame(updateSize);
-}
-window.addEventListener('resize', scheduleResize);
-window.addEventListener('orientationchange', scheduleResize);
-if (window.visualViewport) { window.visualViewport.addEventListener('resize', scheduleResize); }
 
 function initUI() {
     const navbar = document.getElementById('navbar');
@@ -72,6 +80,7 @@ function initUI() {
     const navMenu = document.getElementById('navMenu');
     const gearBtn = document.getElementById('gearBtn');
     const settingsPanel = document.getElementById('settingsPanel');
+    const canvasContainer = document.getElementById('canvas-container');
 
     if (navbar) {
         window.addEventListener('scroll', () => {
@@ -83,7 +92,7 @@ function initUI() {
         menuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             menuBtn.classList.toggle('active');
-            navMenu.classList.toggle('show');
+            if (navMenu) navMenu.classList.toggle('show');
             if (settingsPanel) settingsPanel.classList.remove('show');
         });
     }
@@ -91,7 +100,7 @@ function initUI() {
     if (gearBtn) {
         gearBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            settingsPanel.classList.toggle('show');
+            if (settingsPanel) settingsPanel.classList.toggle('show');
             if (menuBtn) menuBtn.classList.remove('active');
             if (navMenu) navMenu.classList.remove('show');
         });
@@ -119,7 +128,7 @@ function initUI() {
             if (blurVal) blurVal.textContent = `${val}px`;
             if (blurRaf) cancelAnimationFrame(blurRaf);
             blurRaf = requestAnimationFrame(() => {
-                if (container) container.style.filter = val === '0' ? 'none' : `blur(${val}px)`;
+                if (canvasContainer) canvasContainer.style.filter = val === '0' ? 'none' : `blur(${val}px)`;
             });
         });
     }
@@ -160,3 +169,8 @@ function initUI() {
         });
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    init3D();
+    initUI();
+});
