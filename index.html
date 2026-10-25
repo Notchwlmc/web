@@ -454,7 +454,8 @@
     const scene = new THREE.Scene();
     const container = document.getElementById('canvas-container');
 
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    // 修复：将 camera.far 从 1000 调大到 5000，防止天空盒被裁剪出黑块
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
     camera.position.set(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
