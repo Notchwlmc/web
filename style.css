@@ -83,7 +83,7 @@ a { text-decoration: none; color: inherit; }
 .menu-btn.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .menu-btn.active span:nth-child(3) { transform: rotate(-45deg) translateY(0); }
 
-.logo { display: flex; align-items: center; gap: 12px; color: #fff; min-width: 0; overflow: hidden; }
+.logo { display: flex; align-items: center; gap: 12px; color: #fff; min-width: 0; }
 .logo-text-group { display: flex; flex-direction: column; justify-content: center; gap: 2px; min-width: 0; overflow: hidden; }
 .logo-text-cn { display: flex; flex-direction: column; justify-content: center; line-height: 1.1; white-space: nowrap; font-size: 1.3rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 .logo-text-en { display: flex; flex-direction: column; justify-content: center; line-height: 1.1; white-space: nowrap; font-size: 0.65rem; color: #ddd; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 2px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
