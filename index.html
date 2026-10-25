@@ -99,10 +99,12 @@
         .menu-btn.active span:nth-child(3) { transform: rotate(-45deg) translateY(0); }
 
         .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; }
+        
         .logo-text-group {
             display: flex;
-            align-items: center;
-            gap: 8px;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px;
             min-width: 0;
             overflow: hidden;
         }
@@ -129,7 +131,7 @@
             margin-top: 2px;
             text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
-        .logo-dot { width: 10px; height: 10px; background: #25e6c5; border-radius: 50%; box-shadow: 0 0 10px #25e6c5; animation: pulse 2s infinite; }
+        .logo-dot { width: 10px; height: 10px; background: #25e6c5; border-radius: 50%; box-shadow: 0 0 10px #25e6c5; animation: pulse 2s infinite; flex-shrink: 0; }
         @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(37, 230, 197, 0.7); } 50% { box-shadow: 0 0 0 10px rgba(37, 230, 197, 0); } }
 
         .nav-menu {
@@ -159,6 +161,11 @@
         }
 
         .nav-controls { display: flex; align-items: center; gap: 16px; position: relative; min-width: 0; }
+
+        .settings-wrapper {
+            position: relative;
+            flex-shrink: 0;
+        }
 
         .gear-btn {
             display: flex; justify-content: center; align-items: center; width: 42px; height: 42px;
@@ -204,7 +211,7 @@
             cursor: pointer; user-select: none; transition: background-color 0.3s ease, border-color 0.3s ease;
             min-width: 0; flex-shrink: 1;
         }
-        .status-badge .dot { width: 6px; height: 6px; background: #25e6c5; border-radius: 50%; transition: background 0.3s; }
+        .status-badge .dot { width: 6px; height: 6px; background: #25e6c5; border-radius: 50%; transition: background 0.3s; flex-shrink: 0; }
         .status-badge #ipText { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
         .status-badge.copied { border-color: #25e6c5; background: rgba(37, 230, 197, 0.15); }
         .status-badge.copied #ipText { color: #25e6c5; }
@@ -453,16 +460,28 @@
 
         @media (max-width: 768px) {
             .navbar {
-                padding: 0 16px;
+                padding: 0 12px;
                 padding-top: env(safe-area-inset-top);
                 height: auto;
                 min-height: 64px;
+                gap: 10px;
             }
-            .nav-left { gap: 10px; min-width: 0; }
-            .nav-controls { gap: 10px; min-width: 0; }
-            .logo-text-cn { font-size: 1.05rem; }
-            .logo-text-en { font-size: 0.55rem; }
-            .status-badge { max-width: 46vw; padding: 8px 12px; font-size: 0.75rem; min-width: 0; }
+            .nav-left { gap: 8px; min-width: 0; flex-shrink: 1; }
+            .nav-controls { gap: 8px; flex-shrink: 0; }
+            
+            .menu-btn, .gear-btn { width: 38px; height: 38px; }
+            .logo { gap: 8px; }
+            .logo-text-cn { font-size: 1rem; }
+            .logo-text-en { font-size: 0.5rem; margin-top: 0; }
+            .logo-dot { width: 8px; height: 8px; }
+            
+            .status-badge { 
+                max-width: 130px; 
+                padding: 6px 10px; 
+                font-size: 0.75rem; 
+                flex-shrink: 1;
+            }
+            
             .hero h1 { font-size: clamp(2.5rem, 10vw, 3.5rem); letter-spacing: 2px; }
             .content-section {
                 padding: calc(100px + env(safe-area-inset-top)) 20px 40px;
@@ -517,7 +536,7 @@
     </div>
 
     <div class="nav-controls">
-        <div style="position: relative;">
+        <div class="settings-wrapper">
             <button id="gearBtn" class="gear-btn" title="设置">
                 <svg viewBox="0 0 24 24">
                     <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path>
