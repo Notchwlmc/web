@@ -10,7 +10,7 @@
     <style>
         @font-face {
             font-family: 'Minecraft AE';
-            src: url('./MinecraftAE.ttf') format('truetype');
+            src: url('./MinecraftAE-Bold.ttf') format('truetype');
             font-weight: 100 900;
             font-style: normal;
             font-display: swap;
@@ -235,14 +235,12 @@
             min-height: 100vh;
             min-height: 100dvh;
             padding: 120px 40px 60px;
-            /* 基础默认使用不透明背景，移动端通过此设置阻断频闪 */
             background: rgba(10, 10, 15, 0.96);
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        /* 仅在桌面端开启毛玻璃效果 */
         @media (min-width: 769px) {
             .content-section {
                 background: rgba(10, 10, 15, 0.65);
