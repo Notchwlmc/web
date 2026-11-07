@@ -21,12 +21,12 @@ function init3D() {
     const materials = [];
 
     const panoramaFiles = [
-        'https://cdn.jsdelivr.net/gh/Notchwlmc/web@main/panorama_1.png',
-        'https://cdn.jsdelivr.net/gh/Notchwlmc/web@main/panorama_3.png',
-        'https://cdn.jsdelivr.net/gh/Notchwlmc/web@main/panorama_4.png',
-        'https://cdn.jsdelivr.net/gh/Notchwlmc/web@main/panorama_5.png',
-        'https://cdn.jsdelivr.net/gh/Notchwlmc/web@main/panorama_0.png',
-        'https://cdn.jsdelivr.net/gh/Notchwlmc/web@main/panorama_2.png'
+        'http://139.199.160.235/panorama/panorama_1.png',
+        'http://139.199.160.235/panorama/panorama_3.png',
+        'http://139.199.160.235/panorama/panorama_4.png',
+        'http://139.199.160.235/panorama/panorama_5.png',
+        'http://139.199.160.235/panorama/panorama_0.png',
+        'http://139.199.160.235/panorama/panorama_2.png'
     ];
 
     panoramaFiles.forEach(file => {
